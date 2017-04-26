@@ -16,7 +16,7 @@ main =
 
 wsServer : String
 wsServer =
-  "ws://localhost:8080"
+  "ws://localhost:8080/"
 
 
 
@@ -26,13 +26,12 @@ wsServer =
 type alias Model =
   { input : String
   , messages : List String
-  , room : String
   }
 
 
 init : (Model, Cmd Msg)
 init =
-  (Model "" [], Cmd.none, "")
+  (Model "" [], Cmd.none)
 
 
 
@@ -52,10 +51,10 @@ update msg {input, messages} =
       (Model newInput messages, Cmd.none)
 
     Send ->
-      (Model "" messages, WebSocket.send wsServer ++ "/" ++ room input, room)
+      (Model "" messages, WebSocket.send wsServer input)
 
     NewMessage str ->
-      (Model input (str :: messages), Cmd.none, room)
+      (Model input (str :: messages), Cmd.none)
 
 
 
