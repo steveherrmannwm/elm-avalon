@@ -1,10 +1,12 @@
+module Game exposing (..)
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import WebSocket
+import Random
 
-
-
+-- May be going away when we import this into Main.elm
 main =
   Html.program
     { init = init
