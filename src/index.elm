@@ -6,6 +6,8 @@ import Html.Events exposing (..)
 import Random exposing (..)
 import Json.Decode as Json
 import Html.Events.Extra exposing (targetValueIntParse)
+import WebSocket
+
 
 main =
   Html.program
@@ -15,22 +17,63 @@ main =
     , subscriptions = subscriptions
     }
 
+wsServer : String
+wsServer =
+  "ws://localhost:8080/"
 
-type User = Anonymous | Named String
+roomGen : String
+roomGen = wsServer++"gen_room"
+
+joinRoom : String
+joinRoom = wsServer++"join_room"
+
+-- Type definitions
+type LobbyRole = Host | Client | Waiting
+-- Need a better name for this attribute
+
+
+-- Define possible roles for players
+-- TODO: Come up with original names for these roles
+type Role
+  = Merlin
+  | Member
+  | Minion
+  | Percival
+  | Morgana
+  | Oberon
+  | Mordred
+  | Unassigned
+
+type GameState
+  = Home
+  | Setup
+  | TeamBuild
+  | Vote
+  | Final
+
+type alias Player =
+  { name : String
+  , role : Role
+  , lobbyRole : LobbyRole
+  }
+
 
 -- MODEL
 
 
 type alias Model =
-  { username : User
+  { user : Player
   , room : String
   , maxPlayers : Int
+  , chatBox : String
+  , chatMessages : List String
+  , state : GameState
   }
 
 
 model : Model
 model =
-  Model Anonymous "" 0
+  Model (Player "" Unassigned Waiting) "" 0 "" [] Home
 
 
 -- INIT
@@ -38,7 +81,7 @@ model =
 
 init : (Model, Cmd Msg)
 init =
-  (Model Anonymous "" 0, Cmd.none )
+  (model, Cmd.none)
 
 
 -- UPDATE
@@ -46,43 +89,67 @@ init =
 type Msg
     = Name String
     | RoomCode String
-    | JoinRoom Int
+    | JoinRoom String
     | SetMaxPlayers Int
-    | GenCode
-    | Submit
+    | GenRoomCode
+    | GenRoom String
+    | SetRoom
+    | Input String
+    | Send
+    | NewMessage String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Name name ->
-      ({ model | username = Named name }, Cmd.none)
+      ({ model | user = Player name Unassigned Waiting }, Cmd.none)
 
     RoomCode room ->
-      ({ model | room = room }, Cmd.none)
+      ({ model | room = room},
+      Cmd.none)
 
-    JoinRoom code ->
-      ({ model | room = toString code}, Cmd.none)
+    JoinRoom response ->
+      if response == "OK" then
+        ({ model | state = Setup}, WebSocket.send (wsServer ++ model.room)
+          (model.user.name ++ " has entered the room"))
+      else
+        (model, Cmd.none)
+        -- TODO: Add error handling
+
+    SetRoom ->
+      ({model | user = Player model.user.name Unassigned Client}, WebSocket.send joinRoom model.room)
+
+    GenRoom room ->
+      ({model | room = room, user = Player model.user.name Unassigned Host}, WebSocket.send joinRoom room)
+
+    GenRoomCode ->
+      (model, WebSocket.send roomGen "")
+      -- TODO: Figure out if a room code is already taken
 
     SetMaxPlayers players ->
       ({ model | maxPlayers = players}, Cmd.none)
 
-    GenCode ->
-      (model, Random.generate JoinRoom (Random.int 10000 99999))
-      -- TODO: Figure out if a room code is already taken
-      -- May require a connection to the WS server
+    Input newInput ->
+      ({model | chatBox = newInput}, Cmd.none)
 
-    Submit ->
-        (model, Cmd.none)
-        -- Will change the cmd to indicate a change in view
+    Send ->
+      (model, WebSocket.send (wsServer ++ model.room) (model.user.name ++ ": " ++ model.chatBox))
+
+    NewMessage str ->
+      ({model | chatMessages = (str :: model.chatMessages)}, Cmd.none)
 
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
-
+  Sub.batch
+  [ WebSocket.listen (wsServer ++ model.room) NewMessage
+  , WebSocket.listen roomGen GenRoom
+  , WebSocket.listen joinRoom JoinRoom
+  ]
+  -- TODO: Add listeners for other
 
 -- VIEW
 
@@ -91,28 +158,27 @@ playerOption maxPlayers =
 
 view : Model -> Html Msg
 view model =
-  let
-    selectEvent =
-            on "change"
-                (Json.map SetMaxPlayers targetValueIntParse)
-  in
-  div []
-    [ input [ type_ "text", placeholder "Name", onInput Name ] []
-    , input [ type_ "text", placeholder "Room Code", onInput RoomCode] []
-    , select [ selectEvent] (List.map playerOption (List.range 5 10))
-    , button [ onClick GenCode] [text "Start a room"]
-    , button [ onClick Submit] [text "Join Game"]
-    , viewValidation model
-    ]
+  if model.state == Home then
+    let
+      selectEvent =
+              on "change"
+                  (Json.map SetMaxPlayers targetValueIntParse)
+    in
+    div [][
+        input [ type_ "text", placeholder "Name", onInput Name, name "uname", value model.user.name] []
+        , input [ type_ "text", placeholder "Room Code", onInput RoomCode, name "roomcode", value model.room] []
+        , select [ selectEvent] (List.map playerOption (List.range 5 10))
+        , button [ type_ "button", onClick GenRoomCode] [text "Start a room"]
+        , button [ type_ "button", onClick SetRoom] [text "Join Game"]
+        ]
+  else
+    div []
+      [ input [onInput Input, placeholder "Chat with others!"] []
+      , button [onClick Send] [text "Send"]
+      , div [] (List.map viewMessage (List.reverse model.chatMessages))
+      , div [] [text ("Your room code is " ++ model.room)]
+      ]
 
-
-viewValidation : Model -> Html msg
-viewValidation model =
-  let
-    (color, message) =
-      if model.room /= "" then
-        ("black", model.room)
-      else
-        ("red", "No room exists yet")
-  in
-    div [ style [("color", color)] ] [ text message ]
+viewMessage : String -> Html msg
+viewMessage msg =
+  div [] [ text msg ]
