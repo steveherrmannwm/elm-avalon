@@ -1,28 +1,7 @@
-'use strict';
-
-const express = require('express');
-const socketIO = require('socket.io');
-const path = require('path');
-
-const PORT = process.env.PORT || 3000;
-const INDEX = path.join(__dirname, 'index.html');
-
-const server = express()
+var express = require('express');
+var app = express()
   .use((req, res) => res.sendFile(INDEX) )
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
-
-const io = socketIO(server);
-
-io.on('connection', (socket) => {
-  console.log('Client connected');
-  socket.on('disconnect', () => console.log('Client disconnected'));
-});
-
-setInterval(() => io.emit('time', new Date().toTimeString()), 1000);
-
-
-/*var express = require('express');
-var app = express();
 var expressWs = require('express-ws')(app);
 
 const PORT = process.env.PORT || 3000;
@@ -46,10 +25,6 @@ function findObject(obj, list) {
 
     return -1;
 }
-
-app.use((req, res) => res.sendFile(INDEX) )
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
-
 
 app.ws('/gen_room', function(ws, req) {
   ws.on('message', function(msg) {
@@ -267,4 +242,3 @@ app.ws('/char_info', function(ws, req) {
 });
 
 app.listen(8080);
-*/
