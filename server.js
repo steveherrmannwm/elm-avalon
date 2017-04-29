@@ -246,11 +246,13 @@ wss.on('connection', (ws) => {
     }
     if (dc != [])
     {
+      console.log(dc)
       if(Object.keys(rooms[code]["users"]).length == 0 )
       {
         delete rooms[dc[1]];
       }
-      else{
+      else
+      {
         for (var key in rooms[dc[1]]["users"])
         {
           rooms[dc[1]]["users"][key]["connections"]["chat"].send(dc[0] + " has connected");
