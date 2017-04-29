@@ -217,9 +217,7 @@ wss.on('connection', (ws) => {
         });
         break;
   }
-  console.log("OVER HERE")
-  console.log(current_rooms)
-  console.log(current_rooms.indexOf(path))
+
   if(current_rooms.indexOf(path) >= 0){
     var code = path.split("/")[1] // Retrieve the room code
     ws.on('message', function(msg){
@@ -229,6 +227,7 @@ wss.on('connection', (ws) => {
           rooms[code]["users"][parsed["name"]] = {"connections": {"chat": ws}};
         }
         for(var key in rooms[code]["users"]){
+          console.log("SENDING TO " + key)
           rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
         }
 
