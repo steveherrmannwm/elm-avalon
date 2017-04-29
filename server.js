@@ -16,6 +16,7 @@ const wss = new SocketServer({ server });
 
 var rooms = {};
 var current_rooms = [];
+var users = [];
 function randomString(length, chars) {
     var result = '';
     for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
@@ -104,8 +105,7 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
-
-  console.log("LOCATION: " + location)
+  ws.setKeepAlive(true,60000)
 
   switch (path){
     case "/gen_room":
@@ -221,20 +221,22 @@ wss.on('connection', (ws) => {
   if(current_rooms.indexOf(path) >= 0){
     var code = path.split("/")[1] // Retrieve the room code
     ws.on('message', function(msg){
+      ws.set
         var parsed = JSON.parse(msg)
         if(findObject(ws, rooms[code]) < 0)
         {
           rooms[code]["users"][parsed["name"]] = {"connections": {"chat": ws}};
         }
         for(var key in rooms[code]["users"]){
-          console.log("SENDING TO " + key)
           rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
         }
 
 
       })
   }
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    console.log('Client disconnected')
+  });
 });
 
 /*
