@@ -1,6 +1,6 @@
 var express = require('express');
 var app = express();
-var expressWs = require('express-ws')(app);
+
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
@@ -28,6 +28,8 @@ function findObject(obj, list) {
 app.use(function (req, res, next) {
   res.sendFile(INDEX)
 }).listen(PORT, () => console.log("Listening on " + PORT));
+
+var expressWs = require('express-ws')(app);
 
 
 app.ws('/gen_room', function(ws, req) {
