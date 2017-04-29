@@ -106,7 +106,7 @@ wss.on('connection', (ws) => {
 
   console.log("LOCATION: " + location)
 
-  switch (path){
+  switch (location){
     case "/gen_room":
     ws.on('message', function(msg) {
       var code = "";
@@ -115,42 +115,6 @@ wss.on('connection', (ws) => {
       }
       ws.send(code)
       rooms[code] = {"users": {}, "roles": false}
-
-      app.ws('/' + code, function(ws, req) {
-        ws.on('message', function(msg){
-            var parsed = JSON.parse(msg)
-            if(findObject(ws, rooms[code]) < 0)
-            {
-              rooms[code]["users"][parsed["name"]] = {"connections": {"chat": ws}};
-            }
-            for(var key in rooms[code]["users"]){
-              rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
-            }
-
-
-          })
-        ws.on('close', function(){
-          // Remove the connection from the list, and broadcast a message to other clients
-          var dc = ""
-          for(var key in rooms[code]["users"]){
-            if (rooms[code]["users"][key]["connections"]["chat"] === ws)
-            {
-              delete rooms[code]["users"][key];
-              dc = key;
-            }
-          }
-
-          for(var key in rooms[code]["users"]){
-            rooms[code]["users"][key]["connections"]["chat"].send(dc + " has disconnected")
-          }
-
-          if(Object.keys(rooms[code]["users"]).length == 0)
-          {
-            delete rooms[code]
-            console.log(code + " ended");
-          }
-        })
-        })
     });
       break;
     case "/join_room":
@@ -253,6 +217,43 @@ wss.on('connection', (ws) => {
 });
 
 /*
+
+app.ws('/' + code, function(ws, req) {
+  ws.on('message', function(msg){
+      var parsed = JSON.parse(msg)
+      if(findObject(ws, rooms[code]) < 0)
+      {
+        rooms[code]["users"][parsed["name"]] = {"connections": {"chat": ws}};
+      }
+      for(var key in rooms[code]["users"]){
+        rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
+      }
+
+
+    })
+  ws.on('close', function(){
+    // Remove the connection from the list, and broadcast a message to other clients
+    var dc = ""
+    for(var key in rooms[code]["users"]){
+      if (rooms[code]["users"][key]["connections"]["chat"] === ws)
+      {
+        delete rooms[code]["users"][key];
+        dc = key;
+      }
+    }
+
+    for(var key in rooms[code]["users"]){
+      rooms[code]["users"][key]["connections"]["chat"].send(dc + " has disconnected")
+    }
+
+    if(Object.keys(rooms[code]["users"]).length == 0)
+    {
+      delete rooms[code]
+      console.log(code + " ended");
+    }
+  })
+  })
+
 app.ws('/gen_room', function(ws, req) {
   ws.on('message', function(msg) {
     var code = "";
