@@ -1,11 +1,13 @@
+const PORT = process.env.PORT || 3000;
+const INDEX = path.join(__dirname, 'index.html');
+
 var express = require('express');
 var app = express()
   .use((req, res) => res.sendFile(INDEX) )
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 var expressWs = require('express-ws')(app);
 
-const PORT = process.env.PORT || 3000;
-const INDEX = path.join(__dirname, 'index.html');
+
 
 var rooms = {};
 // TODO: Convert to using broadcast channels
