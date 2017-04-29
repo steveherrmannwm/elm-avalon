@@ -24,10 +24,8 @@ function findObject(obj, list) {
     return -1;
 }
 
-app.use(function (req, res, next) {
-  req.testing = 'testing';
-  return next();
-});
+app.use((req, res) => res.sendFile(INDEX) )
+  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 
 app.ws('/gen_room', function(ws, req) {
