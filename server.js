@@ -31,6 +31,10 @@ app.use(function (req, res, next) {
 
 var expressWs = require('express-ws')(app);
 
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+  ws.on('close', () => console.log('Client disconnected'));
+});
 
 app.ws('/gen_room', function(ws, req) {
   ws.on('message', function(msg) {
