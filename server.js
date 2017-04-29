@@ -1,3 +1,5 @@
+const path = require('path');
+
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(__dirname, 'index.html');
 
