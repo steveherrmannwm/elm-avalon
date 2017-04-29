@@ -244,6 +244,7 @@ wss.on('connection', (ws) => {
         }
       }
     }
+    console.log(dc)
     if(Object.keys(rooms[code]["users"]).length == 0 )
     {
       delete rooms[dc[1]];
