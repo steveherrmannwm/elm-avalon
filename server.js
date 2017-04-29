@@ -234,7 +234,7 @@ wss.on('connection', (ws) => {
   }
   ws.on('close', () => {
     console.log('Client disconnected')
-    var dc = []
+    var dc = null
     for(var code in rooms){
       for(var key in rooms[code]["users"]){
         if(rooms[code]["users"][key]["connections"]["chat"] === ws)
@@ -244,7 +244,7 @@ wss.on('connection', (ws) => {
         }
       }
     }
-    if (dc != [])
+    if (dc != null)
     {
       console.log(dc)
       if(Object.keys(rooms[code]["users"]).length == 0 )
