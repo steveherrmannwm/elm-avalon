@@ -1,4 +1,30 @@
-var express = require('express');
+'use strict';
+
+const express = require('express');
+const SocketServer = require('ws').Server;
+const path = require('path');
+
+const PORT = process.env.PORT || 3000;
+const INDEX = path.join(__dirname, 'index.html');
+
+const server = express()
+  .use((req, res) => res.sendFile(INDEX) )
+  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
+
+const wss = new SocketServer({ server });
+
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+  ws.on('close', () => console.log('Client disconnected'));
+});
+
+setInterval(() => {
+  wss.clients.forEach((client) => {
+    client.send(new Date().toTimeString());
+  });
+}, 1000);
+
+/*var express = require('express');
 var app = express();
 
 const path = require('path');
@@ -30,12 +56,6 @@ app.use(function (req, res, next) {
 }).listen(PORT, () => console.log("Listening on " + PORT));
 
 var expressWs = require('express-ws')(app);
-
-wss.on('connection', (ws) => {
-  console.log('Client connected');
-  ws.on('close', () => console.log('Client disconnected'));
-});
-
 app.ws('/gen_room', function(ws, req) {
   ws.on('message', function(msg) {
     var code = "";
@@ -250,3 +270,4 @@ app.ws('/char_info', function(ws, req) {
 
     });
 });
+*/
