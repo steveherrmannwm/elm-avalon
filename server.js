@@ -106,7 +106,7 @@ wss.on('connection', (ws) => {
 
   console.log("LOCATION: " + location)
 
-  switch (location){
+  switch (path){
     case "/gen_room":
     ws.on('message', function(msg) {
       var code = "";
@@ -115,7 +115,7 @@ wss.on('connection', (ws) => {
       }
       ws.send(code)
       rooms[code] = {"users": {}, "roles": false}
-    });
+      });
       break;
     case "/join_room":
       ws.on('message', function(msg) {
