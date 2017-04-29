@@ -249,7 +249,7 @@ wss.on('connection', (ws) => {
       delete rooms[dc[1]];
     }
     else{
-      for (var key in room[dc[1]]["users"])
+      for (var key in rooms[dc[1]]["users"])
       {
         rooms[dc[1]]["users"][key]["connections"]["chat"].send(dc[0] + " has connected");
       }
