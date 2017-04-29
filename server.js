@@ -103,6 +103,8 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
   var location = url.parse(ws.upgradeReq.url, true)
 
+  console.log("LOCATION: " + location)
+
   switch (location){
     case "/gen_room":
     ws.on('message', function(msg) {
