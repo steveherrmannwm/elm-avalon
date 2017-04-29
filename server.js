@@ -163,7 +163,7 @@ wss.on('connection', (ws) => {
         ws.send(rooms[parsed["room"]]["users"][parsed['user']]['role'].join(","))
       });
       break;
-    case '/char_info'
+    case '/char_info':
       ws.on("message", function(msg){
         var parsed = JSON.parse(msg)
         var role = rooms[parsed['room']]['users'][parsed['user']]['role']
