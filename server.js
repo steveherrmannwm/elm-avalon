@@ -105,8 +105,6 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
-  ws.setKeepAlive(true,60000)
-
   switch (path){
     case "/gen_room":
     ws.on('message', function(msg) {
@@ -236,6 +234,27 @@ wss.on('connection', (ws) => {
   }
   ws.on('close', () => {
     console.log('Client disconnected')
+    var dc = []
+    for(var code in rooms){
+      for(var key in rooms[code]["users"]){
+        if(rooms[code]["users"][key]["connections"]["chat"] === ws)
+        {
+          delete rooms[code]["users"][key];
+          dc = [key, code];
+        }
+      }
+    }
+    if(Object.keys(rooms[code]["users"]).length == 0 )
+    {
+      delete rooms[dc[1]];
+    }
+    else{
+      for (var key in room[dc[1]]["users"])
+      {
+        rooms[dc[1]]["users"][key]["connections"]["chat"].send(dc[0] + " has connected");
+      }
+    }
+    })
   });
 });
 
