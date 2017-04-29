@@ -117,7 +117,7 @@ wss.on('connection', (ws) => {
       ws.send(code)
       rooms[code] = {"users": {}, "roles": false}
 
-      current_rooms.push(code)
+      current_rooms.push("/"+code)
 
 
       });
