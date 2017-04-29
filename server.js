@@ -244,15 +244,17 @@ wss.on('connection', (ws) => {
         }
       }
     }
-    console.log(dc)
-    if(Object.keys(rooms[code]["users"]).length == 0 )
+    if (dc != [])
     {
-      delete rooms[dc[1]];
-    }
-    else{
-      for (var key in rooms[dc[1]]["users"])
+      if(Object.keys(rooms[code]["users"]).length == 0 )
       {
-        rooms[dc[1]]["users"][key]["connections"]["chat"].send(dc[0] + " has connected");
+        delete rooms[dc[1]];
+      }
+      else{
+        for (var key in rooms[dc[1]]["users"])
+        {
+          rooms[dc[1]]["users"][key]["connections"]["chat"].send(dc[0] + " has connected");
+        }
       }
     }
   });
