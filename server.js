@@ -15,6 +15,7 @@ const server = express()
 const wss = new SocketServer({ server });
 
 var rooms = {};
+var current_rooms = [];
 function randomString(length, chars) {
     var result = '';
     for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
@@ -115,6 +116,10 @@ wss.on('connection', (ws) => {
       }
       ws.send(code)
       rooms[code] = {"users": {}, "roles": false}
+
+      current_rooms.push(code)
+
+
       });
       break;
     case "/join_room":
@@ -212,7 +217,21 @@ wss.on('connection', (ws) => {
         });
         break;
   }
+  if(current_rooms.indexOf(path) >= 0){
+    var code = path.split("/")[1] // Retrieve the room code 
+    ws.on('message', function(msg){
+        var parsed = JSON.parse(msg)
+        if(findObject(ws, rooms[code]) < 0)
+        {
+          rooms[code]["users"][parsed["name"]] = {"connections": {"chat": ws}};
+        }
+        for(var key in rooms[code]["users"]){
+          rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
+        }
 
+
+      })
+  }
   ws.on('close', () => console.log('Client disconnected'));
 });
 
