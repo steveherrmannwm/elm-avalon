@@ -14,15 +14,12 @@ const server = express()
 const wss = new SocketServer({ server });
 
 wss.on('connection', (ws) => {
+  const location = url.parse(ws.upgradeReq.url, true);
   console.log('Client connected');
   ws.on('close', () => console.log('Client disconnected'));
 });
 
-setInterval(() => {
-  wss.clients.forEach((client) => {
-    client.send(new Date().toTimeString());
-  });
-}, 1000);
+
 
 var rooms = {};
 function randomString(length, chars) {
