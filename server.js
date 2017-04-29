@@ -1,13 +1,9 @@
-const path = require('path');
+var express = require('express');
+var app = express();
+var expressWs = require('express-ws')(app);
 
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(__dirname, 'index.html');
-
-var express = require('express');
-var app = express()
-var expressWs = require('express-ws')(app);
-
-
 
 var rooms = {};
 // TODO: Convert to using broadcast channels
@@ -27,6 +23,11 @@ function findObject(obj, list) {
 
     return -1;
 }
+
+app.use(function (req, res, next) {
+  res.sendFile(INDEX)
+}).listen(PORT, () => console.log("Listening on ${ PORT }"));
+
 
 app.ws('/gen_room', function(ws, req) {
   ws.on('message', function(msg) {
