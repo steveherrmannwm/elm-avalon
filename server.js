@@ -24,16 +24,7 @@ setInterval(() => {
   });
 }, 1000);
 
-/*var express = require('express');
-var app = express();
-
-const path = require('path');
-
-const PORT = process.env.PORT || 3000;
-const INDEX = path.join(__dirname, 'index.html');
-
 var rooms = {};
-// TODO: Convert to using broadcast channels
 function randomString(length, chars) {
     var result = '';
     for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
@@ -51,11 +42,7 @@ function findObject(obj, list) {
     return -1;
 }
 
-app.use(function (req, res, next) {
-  res.sendFile(INDEX)
-}).listen(PORT, () => console.log("Listening on " + PORT));
-
-var expressWs = require('express-ws')(app);
+/*
 app.ws('/gen_room', function(ws, req) {
   ws.on('message', function(msg) {
     var code = "";

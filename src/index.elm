@@ -21,7 +21,7 @@ main =
 
 wsServer : String
 wsServer =
-  "http://elm-avalon.herokuapp.com/"
+  "ws://elm-avalon.herokuapp.com/"
 
 roomGen : String
 roomGen = wsServer++"gen_room"
