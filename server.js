@@ -15,6 +15,7 @@ const wss = new SocketServer({ server });
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
+  console.log(url.parse(sws.upgradeReq.url, true))
   ws.on('close', () => console.log('Client disconnected'));
 });
 
