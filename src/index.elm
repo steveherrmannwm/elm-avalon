@@ -21,7 +21,7 @@ main =
 
 wsServer : String
 wsServer =
-  "ws://sample-env-1.94pd2phgp7.us-east-2.elasticbeanstalk.com/:8080/"
+  "https://elm0avalon.herokuapp.com:8080"
 
 roomGen : String
 roomGen = wsServer++"gen_room"

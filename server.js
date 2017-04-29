@@ -237,7 +237,7 @@ app.ws('/char_info', function(ws, req) {
       ws.send("As a member, you have no one revealed! Pay close attention to the conversation to try and get info")
     }
     else if (role[0] == "Oberon")
-      ws.send("As Oberon, you don't know who your fellow evil-does are! Pay close attention to the conversation to try and get info")
+      ws.send("As Oberon, you don't know who your fellow evil-doers are! Pay close attention to the conversation to try and get info")
 
     });
 });
