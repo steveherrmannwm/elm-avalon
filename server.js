@@ -5,8 +5,6 @@ const INDEX = path.join(__dirname, 'index.html');
 
 var express = require('express');
 var app = express()
-  .use((req, res) => res.sendFile(INDEX) )
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 var expressWs = require('express-ws')(app);
 
 
