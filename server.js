@@ -2,6 +2,9 @@ var express = require('express');
 var app = express();
 var expressWs = require('express-ws')(app);
 
+const PORT = process.env.PORT || 8080;
+const INDEX = path.join(__dirname, 'index.html');
+
 var rooms = {};
 // TODO: Convert to using broadcast channels
 function randomString(length, chars) {
