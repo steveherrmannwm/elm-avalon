@@ -217,6 +217,7 @@ wss.on('connection', (ws) => {
         });
         break;
   }
+  console.log("OVER HERE")
   console.log(current_rooms)
   console.log(current_rooms.indexOf(path))
   if(current_rooms.indexOf(path) >= 0){
