@@ -101,6 +101,7 @@ function shuffle(a) {
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
+  console.log(ws.upgradeReq)
   var location = url.parse(ws.upgradeReq.url, true)
 
   console.log("LOCATION: " + location)
