@@ -101,12 +101,12 @@ function shuffle(a) {
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
-  console.log(ws.upgradeReq)
   var location = url.parse(ws.upgradeReq.url, true)
+  var path = location.pathname
 
   console.log("LOCATION: " + location)
 
-  switch (location){
+  switch (path){
     case "/gen_room":
     ws.on('message', function(msg) {
       var code = "";
