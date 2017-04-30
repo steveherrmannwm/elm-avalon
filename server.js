@@ -122,10 +122,19 @@ wss.on('connection', (ws) => {
       break;
     case "/join_room":
       ws.on('message', function(msg) {
+        var parsed = JSON.parse(msg)
         console.log("JOIN " + msg)
-        if(Object.keys(rooms).indexOf(msg) >= 0)
+        if(Object.keys(rooms).indexOf(parsed["room"]) >= 0)
         {
-          ws.send('OK')
+          if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed[0]) >= 0)
+          {
+            ws.send("Username is taken in this room")
+          }
+          else
+          {
+            ws.send('OK')
+          }
+
         }
         else {
           ws.send("Room isn't registered")
@@ -218,7 +227,7 @@ wss.on('connection', (ws) => {
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg)
           console.log(parsed)
-          ws.send("TBD")
+
         });
         break;
 
