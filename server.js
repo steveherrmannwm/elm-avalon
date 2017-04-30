@@ -162,7 +162,7 @@ wss.on('connection', (ws) => {
         }
       });
       break;
-    case "/retrieveRole":
+    case "/retrieve_role":
       ws.on("message", function(msg){
         var parsed = JSON.parse(msg)
         console.log(Object.keys(rooms[parsed["room"]]["users"]))
