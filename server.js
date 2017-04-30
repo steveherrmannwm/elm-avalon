@@ -123,7 +123,7 @@ wss.on('connection', (ws) => {
     case "/join_room":
       ws.on('message', function(msg) {
         var parsed = JSON.parse(msg)
-        console.log("JOIN " + msg)
+        console.log(parsed)
         if(Object.keys(rooms).indexOf(parsed["room"]) >= 0)
         {
           if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed[0]) >= 0)
