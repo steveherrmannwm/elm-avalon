@@ -277,7 +277,7 @@ wss.on('connection', (ws) => {
       {
         for (var key in rooms[dc[1]]["users"])
         {
-          rooms[dc[1]]["users"][key]["connections"]["chat"].send(dc[0] + " has connected");
+          rooms[dc[1]]["users"][key]["connections"]["chat"].send(dc[0] + " has disconnected");
         }
       }
     }
