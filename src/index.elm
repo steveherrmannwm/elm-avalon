@@ -254,7 +254,12 @@ update msg model =
       (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string model.room)])))
 
     SubmitQuestTeam ->
-      (model, WebSocket.send setQuestMembers (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string model.room)])))
+      if model.quest.playersRequired == (List.length model.quest.players) then
+        (model, WebSocket.send setQuestMembers (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string model.room), ("players", Json.Encode.list (List.map string model.quest.players))])))
+      else if model.quest.playersRequired > (List.length model.quest.players) then
+        ({model | errors = "Need more players on this quest"}, Cmd.none)
+      else
+        ({model | errors = "Too many players selected on quest"}, Cmd.none)
 
 -- SUBSCRIPTIONS
 
@@ -310,6 +315,7 @@ view model =
           if getListPosition model.currentPlayers model.leaderPosition ==  model.user.name then
             [div [] [ text ("You're the current quest leader. Please select " ++ toString model.quest.playersRequired ++ " players to go on the quest")]
             ,div [] [(fieldset [] (List.map createCheckboxes model.currentPlayers))]
+            ,div [onClick SubmitQuestTeam] [ text ("Submit Quest Players")]
             ]
           else
             [div [] [text ("Waiting for "++ getListPosition model.currentPlayers model.leaderPosition ++ " to finish selecting a team")]]

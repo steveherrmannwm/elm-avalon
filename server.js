@@ -214,6 +214,14 @@ wss.on('connection', (ws) => {
 
         });
         break;
+      case "/set_quest_members":
+        ws.on("message", function(msg){
+          var parsed = JSON.parse(msg)
+          console.log(parsed)
+          ws.send("TBD")
+        });
+        break;
+
   }
 
   if(current_rooms.indexOf(path) >= 0){
