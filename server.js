@@ -133,8 +133,7 @@ wss.on('connection', (ws) => {
         console.log(rooms)
         if(Object.keys(rooms).indexOf(parsed["room"]) >= 0)
         {
-          console.log(Object.keys(rooms[parsed["room"]]["users"]))
-          if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed[0]) >= 0)
+          if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed["name"]) >= 0)
           {
             ws.send("Username is taken in this room")
           }
