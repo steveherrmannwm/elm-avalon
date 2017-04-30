@@ -105,133 +105,138 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
-  switch (path){
-    case "/gen_room":
-    ws.on('message', function(msg) {
-      var code = "";
-      while(code == "" || Object.keys(rooms).indexOf(code) > 1){
-        code = randomString(5, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
-      }
-      ws.send(code)
-      rooms[code] = {"users": {}, "roles": false}
-
-      current_rooms.push("/"+code)
-
-
-      });
-      break;
-    case "/join_room":
+  try {
+    switch (path){
+      case "/gen_room":
       ws.on('message', function(msg) {
-        var parsed = JSON.parse(msg)
-        console.log(parsed)
-        if(Object.keys(rooms).indexOf(parsed["room"]) >= 0)
-        {
-          if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed[0]) >= 0)
-          {
-            ws.send("Username is taken in this room")
-          }
-          else
-          {
-            ws.send('OK')
-          }
+        var code = "";
+        while(code == "" || Object.keys(rooms).indexOf(code) > 1){
+          code = randomString(5, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        }
+        ws.send(code)
+        rooms[code] = {"users": {}, "roles": false}
 
-        }
-        else {
-          ws.send("Room isn't registered")
-        }
-      });
-      break;
-    case "/player_list":
-      ws.on("message", function(msg){
-        var parsed = JSON.parse(msg)
-        console.log(Object.keys(rooms[parsed["room"]]["users"]))
-        ws.send(Object.keys(rooms[parsed["room"]]["users"]).join(","))
-      });
-      break;
+        current_rooms.push("/"+code)
 
-    case "/create_roles":
-      ws.on("message", function(msg){
-      var parsed = JSON.parse(msg)
-      if (parsed["maxPlayers"] - Object.keys(rooms[parsed['room']]['users']).length == 0)
-      {
-        if(!rooms[parsed['room']]['roles']){
-          var roles = shuffle(generateRoles(parsed['maxPlayers']))
-          console.log("Creating roles")
-          var index = 0;
-          for(var key in rooms[parsed['room']]["users"]){
-            rooms[parsed['room']]['users'][key]['role'] = roles[index];
-            index++;
-          }
-          rooms[parsed['room']]['roles'] = true;
-        }
-          ws.send("OK")
-        }
-        else {
-          ws.send("NEP")
-        }
-      });
-      break;
-    case "/retrieve_role":
-      ws.on("message", function(msg){
-        var parsed = JSON.parse(msg)
-        console.log(Object.keys(rooms[parsed["room"]]["users"]))
-        ws.send(rooms[parsed["room"]]["users"][parsed['user']]['role'].join(","))
-      });
-      break;
-    case '/char_info':
-      ws.on("message", function(msg){
-        var parsed = JSON.parse(msg)
-        var role = rooms[parsed['room']]['users'][parsed['user']]['role']
-
-        // Special characters
-        var acc = []
-        var sent = false
-        switch(role[0]){
-          case "Merlin":
-            for(var key in rooms[parsed['room']]["users"]){
-              var char_role = rooms[parsed['room']]['users'][key]['role'];
-              if(char_role[1] != "Good" && char_role[0] != "Mordred")
-                acc.push(key)
-            }
-            ws.send("As Merlin, you revealed " + acc.join(", ") + " to be evil");
-            break;
-          case "Percival":
-            for(var key in rooms[parsed['room']]["users"]){
-              var char_role = rooms[parsed['room']]['users'][key]['role'];
-              if(char_role[0] == "Merlin" || char_role[0] == "Morgana")
-                acc.push(key)
-            }
-            ws.send("As Percival, you revealed " + acc.join(", ") + " to be Merlin");
-            break;
-        }
-        // This case is ignored by our specials above, as their both always good
-        // so we can still use acc safely
-        if(role[1] != "Good" && role[0] != "Oberon")
-        {
-          for(var key in rooms[parsed['room']]["users"]){
-            var char_role = rooms[parsed['room']]['users'][key]['role'];
-            if(char_role[1] != 'Good' && char_role['0'] != "Oberon")
-              acc.push(key)
-          }
-          ws.send("As an evil-doer, you know your fellow evildoers are " + acc.join(', '))
-        }
-        else if(role[0] == "Member"){
-          ws.send("As a member, you have no one revealed! Pay close attention to the conversation to try and get info")
-        }
-        else if (role[0] == "Oberon")
-          ws.send("As Oberon, you don't know who your fellow evil-doers are! Pay close attention to the conversation to try and get info")
 
         });
         break;
-      case "/set_quest_members":
-        ws.on("message", function(msg){
+      case "/join_room":
+        ws.on('message', function(msg) {
           var parsed = JSON.parse(msg)
           console.log(parsed)
+          if(Object.keys(rooms).indexOf(parsed["room"]) >= 0)
+          {
+            if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed[0]) >= 0)
+            {
+              ws.send("Username is taken in this room")
+            }
+            else
+            {
+              ws.send('OK')
+            }
 
+          }
+          else {
+            ws.send("Room isn't registered")
+          }
+        });
+        break;
+      case "/player_list":
+        ws.on("message", function(msg){
+          var parsed = JSON.parse(msg)
+          console.log(Object.keys(rooms[parsed["room"]]["users"]))
+          ws.send(Object.keys(rooms[parsed["room"]]["users"]).join(","))
         });
         break;
 
+      case "/create_roles":
+        ws.on("message", function(msg){
+        var parsed = JSON.parse(msg)
+        if (parsed["maxPlayers"] - Object.keys(rooms[parsed['room']]['users']).length == 0)
+        {
+          if(!rooms[parsed['room']]['roles']){
+            var roles = shuffle(generateRoles(parsed['maxPlayers']))
+            console.log("Creating roles")
+            var index = 0;
+            for(var key in rooms[parsed['room']]["users"]){
+              rooms[parsed['room']]['users'][key]['role'] = roles[index];
+              index++;
+            }
+            rooms[parsed['room']]['roles'] = true;
+          }
+            ws.send("OK")
+          }
+          else {
+            ws.send("NEP")
+          }
+        });
+        break;
+      case "/retrieve_role":
+        ws.on("message", function(msg){
+          var parsed = JSON.parse(msg)
+          console.log(Object.keys(rooms[parsed["room"]]["users"]))
+          ws.send(rooms[parsed["room"]]["users"][parsed['user']]['role'].join(","))
+        });
+        break;
+      case '/char_info':
+        ws.on("message", function(msg){
+          var parsed = JSON.parse(msg)
+          var role = rooms[parsed['room']]['users'][parsed['user']]['role']
+
+          // Special characters
+          var acc = []
+          var sent = false
+          switch(role[0]){
+            case "Merlin":
+              for(var key in rooms[parsed['room']]["users"]){
+                var char_role = rooms[parsed['room']]['users'][key]['role'];
+                if(char_role[1] != "Good" && char_role[0] != "Mordred")
+                  acc.push(key)
+              }
+              ws.send("As Merlin, you revealed " + acc.join(", ") + " to be evil");
+              break;
+            case "Percival":
+              for(var key in rooms[parsed['room']]["users"]){
+                var char_role = rooms[parsed['room']]['users'][key]['role'];
+                if(char_role[0] == "Merlin" || char_role[0] == "Morgana")
+                  acc.push(key)
+              }
+              ws.send("As Percival, you revealed " + acc.join(", ") + " to be Merlin");
+              break;
+          }
+          // This case is ignored by our specials above, as their both always good
+          // so we can still use acc safely
+          if(role[1] != "Good" && role[0] != "Oberon")
+          {
+            for(var key in rooms[parsed['room']]["users"]){
+              var char_role = rooms[parsed['room']]['users'][key]['role'];
+              if(char_role[1] != 'Good' && char_role['0'] != "Oberon")
+                acc.push(key)
+            }
+            ws.send("As an evil-doer, you know your fellow evildoers are " + acc.join(', '))
+          }
+          else if(role[0] == "Member"){
+            ws.send("As a member, you have no one revealed! Pay close attention to the conversation to try and get info")
+          }
+          else if (role[0] == "Oberon")
+            ws.send("As Oberon, you don't know who your fellow evil-doers are! Pay close attention to the conversation to try and get info")
+
+          });
+          break;
+        case "/set_quest_members":
+          ws.on("message", function(msg){
+            var parsed = JSON.parse(msg)
+            console.log(parsed)
+
+          });
+          break;
+
+    }
+  } catch (e) {
+    console.log("An error occurred")
   }
+
 
   if(current_rooms.indexOf(path) >= 0){
     var code = path.split("/")[1] // Retrieve the room code
