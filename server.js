@@ -128,9 +128,12 @@ wss.on('connection', (ws) => {
     case "/join_room":
       ws.on('message', function(msg) {
         var parsed = JSON.parse(msg)
+        console.log("LOOK HERE")
         console.log(parsed)
+        console.log(rooms)
         if(Object.keys(rooms).indexOf(parsed["room"]) >= 0)
         {
+          console.log(Object.keys(rooms[parsed["room"]]["users"]))
           if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed[0]) >= 0)
           {
             ws.send("Username is taken in this room")
