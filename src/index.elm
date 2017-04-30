@@ -207,7 +207,7 @@ update msg model =
         ({model | errors = response}, Cmd.none)
 
     SetRoom ->
-      ({model | user = Player model.user.name Unassigned Unaligned}, WebSocket.send joinRoom (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string room)])))
+      ({model | user = Player model.user.name Unassigned Unaligned}, WebSocket.send joinRoom (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string model.room)])))
 
     GenRoom room ->
       ({model | room = room, user = Player model.user.name Unassigned Unaligned}, WebSocket.send joinRoom (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string room)])))
