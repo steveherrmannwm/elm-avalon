@@ -12250,10 +12250,11 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 							_0: A2(
 								_elm_lang$html$Html$div,
 								{ctor: '[]'},
-								A2(
-									_elm_lang$core$List$map,
-									_steveherrmannwm$elm_avalon$Index$viewMessage,
-									_elm_lang$core$List$reverse(model.chatMessages))),
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(model.quest.name),
+									_1: {ctor: '[]'}
+								}),
 							_1: {
 								ctor: '::',
 								_0: A2(
@@ -12261,7 +12262,7 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 									{ctor: '[]'},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text(model.revealedInfo),
+										_0: _elm_lang$html$Html$text(model.quest.flavorText),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -12269,7 +12270,18 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 									_0: A2(
 										_elm_lang$html$Html$div,
 										{ctor: '[]'},
-										selectionBlock),
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text(
+												A2(
+													_elm_lang$core$Basics_ops['++'],
+													'It takes ',
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														_elm_lang$core$Basics$toString(model.quest.toFail),
+														' failures to fail this task.'))),
+											_1: {ctor: '[]'}
+										}),
 									_1: {
 										ctor: '::',
 										_0: A2(
@@ -12277,10 +12289,62 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 											{ctor: '[]'},
 											{
 												ctor: '::',
-												_0: _elm_lang$html$Html$text(model.errors),
+												_0: _elm_lang$html$Html$text(
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														'You\'ve tried to complete ',
+														A2(
+															_elm_lang$core$Basics_ops['++'],
+															_elm_lang$core$Basics$toString(model.quest.timesTried),
+															A2(
+																_elm_lang$core$Basics_ops['++'],
+																' times. If you fail to assign a team ',
+																A2(
+																	_elm_lang$core$Basics_ops['++'],
+																	_elm_lang$core$Basics$toString(5 - model.quest.timesTried),
+																	' then the hackers win.'))))),
 												_1: {ctor: '[]'}
 											}),
-										_1: {ctor: '[]'}
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$div,
+												{ctor: '[]'},
+												A2(
+													_elm_lang$core$List$map,
+													_steveherrmannwm$elm_avalon$Index$viewMessage,
+													_elm_lang$core$List$reverse(model.chatMessages))),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$div,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text(model.revealedInfo),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$div,
+														{ctor: '[]'},
+														selectionBlock),
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$div,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text(model.errors),
+																_1: {ctor: '[]'}
+															}),
+														_1: {ctor: '[]'}
+													}
+												}
+											}
+										}
 									}
 								}
 							}
