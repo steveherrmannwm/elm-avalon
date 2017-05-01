@@ -17,6 +17,29 @@ const wss = new SocketServer({ server });
 var rooms = {};
 var current_rooms = [];
 var users = [];
+
+var quests = {"Bug Investigation" : {"flavor_text": "Someone has to figure out why that one function doesn't work",
+                                     "on_success": "Congrats! Your team found the source of the bug",
+                                     "on_fail": "Your team failed to resolve this bug. Was it the work of a hacker on the inside"
+                                    },
+              "Order Pizzas" : {"flavor_text": "Every group needs break-time, but someone has to pay for it",
+                                "on_success": "The group happily devours a delicious meal after a session of hard work.",
+                                "on_fail": "Somebody ordered pizza with pineapple and mushrooms on it. Now nobody can be happy. Thanks Hackers :/"
+                               },
+              "Create Unit Tests" : {"flavor_text": "Build the code to the spec, not the spec to code",
+                                     "on_success": "Your team built the tests before you coded the application. Way to go!",
+                                     "on_fail": "Your team built the tests after coding the application, and now nothing meets the build spec. Clearly the work of some hacker."
+                                    },
+              "Merge the most recent pull request" : {"flavor_text":"There are few things in live more tedious than resolving a merge conflict",
+                                                      "on_success": "A few changes were needed here or there, but the job got successfully finished. Nice job team!",
+                                                      "on_fail": "Somebody decided to just force push, and now everything is broken. This must be the work of an enemy hacker."
+                                                     },
+              "Find deployment solutions" : {"flavor_text": "Programs are only useful to those who can use them.",
+                                             "on_success": "Your team managed to find an effective deployment solution to cater to your target audience.",
+                                             "on_fail": "The report for this task just says \"It works on my PC.\". Did you assign some hacker to this task?"
+                                            }
+             }
+
 function randomString(length, chars) {
     var result = '';
     for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
@@ -90,6 +113,61 @@ function generateRoles(players)
    return acc;
 }
 
+function generateQuest(roundNumber, maxPlayers, questTexts){
+
+  var templates = {5: [{"players": 2, "to_fail": 1},
+                       {"players": 3, "to_fail": 1},
+                       {"players": 2, "to_fail": 1},
+                       {"players": 3, "to_fail": 1},
+                       {"players": 3, "to_fail": 1},
+                      ],
+                   6: [{"players": 2, "to_fail": 1},
+                       {"players": 3, "to_fail": 1},
+                       {"players": 4, "to_fail": 1},
+                       {"players": 3, "to_fail": 1},
+                       {"players": 4, "to_fail": 1},
+                     ],
+                   7: [{"players": 2, "to_fail": 1},
+                       {"players": 3, "to_fail": 1},
+                       {"players": 3, "to_fail": 1},
+                       {"players": 4, "to_fail": 2},
+                       {"players": 4, "to_fail": 1},
+                      ],
+                   8: [{"players": 3, "to_fail": 1},
+                       {"players": 4, "to_fail": 1},
+                       {"players": 4, "to_fail": 1},
+                       {"players": 5, "to_fail": 2},
+                       {"players": 5, "to_fail": 1},
+                      ],
+                   9: [{"players": 3, "to_fail": 1},
+                       {"players": 4, "to_fail": 1},
+                       {"players": 4, "to_fail": 1},
+                       {"players": 5, "to_fail": 2},
+                       {"players": 5, "to_fail": 1},
+                      ],
+                   10: [{"players": 3, "to_fail": 1},
+                       {"players": 4, "to_fail": 1},
+                       {"players": 4, "to_fail": 1},
+                       {"players": 5, "to_fail": 2},
+                       {"players": 5, "to_fail": 1},
+                      ]
+                 };
+  var quest_template = templates[maxPlayers][roundNumber];
+
+  var keys = Object.keys(questTexts)
+  var key = Object.keys(questTexts)[Math.random() * keys.length];
+
+  return {"name": key,
+          "required_players": quest_template["players"],
+          "flavor_text": questTexts[key]["flavor_text"],
+          "to_fail": quest_template["to_fail"],
+          "on_success": questTexts[key]["on_success"],
+          "on_fail": questTexts[key]["on_fail"],
+          "times_tried" : 0,
+          "players": []
+         }
+}
+
 function shuffle(a) {
     var j, x, i;
     for (i = a.length; i; i--) {
@@ -105,11 +183,6 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
-  try {
-
-  } catch (e) {
-
-  }
   switch (path){
     case "/gen_room":
     ws.on('message', function(msg) {
@@ -118,19 +191,19 @@ wss.on('connection', (ws) => {
         code = randomString(5, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
       }
       ws.send(code)
-      rooms[code] = {"users": {}, "roles": false}
-
+      rooms[code] = {"users": {},
+                     "roles": false,
+                     "available_quests": quests,
+                     "quest": {"name": "", "required_players": 2, "flavor_text":"",
+                               "to_fail": 1, "on_success":"", "on_fail":"", "times_tried": 0,
+                               "players": []
+                              }}
       current_rooms.push("/"+code)
-
-
       });
       break;
     case "/join_room":
       ws.on('message', function(msg) {
         var parsed = JSON.parse(msg)
-        console.log("LOOK HERE")
-        console.log(parsed)
-        console.log(rooms)
         if(Object.keys(rooms).indexOf(parsed["room"]) >= 0)
         {
           if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed["name"]) >= 0)
@@ -200,7 +273,7 @@ wss.on('connection', (ws) => {
               if(char_role[1] != "Good" && char_role[0] != "Mordred")
                 acc.push(key)
             }
-            ws.send("As Merlin, you revealed " + acc.join(", ") + " to be evil");
+            ws.send("As the SysAdmin, you revealed " + acc.join(", ") + " to be evil");
             break;
           case "Percival":
             for(var key in rooms[parsed['room']]["users"]){
@@ -208,7 +281,7 @@ wss.on('connection', (ws) => {
               if(char_role[0] == "Merlin" || char_role[0] == "Morgana")
                 acc.push(key)
             }
-            ws.send("As Percival, you revealed " + acc.join(", ") + " to be Merlin");
+            ws.send("As the Manager, you revealed " + acc.join(", ") + " to be Merlin");
             break;
         }
         // This case is ignored by our specials above, as their both always good
@@ -220,21 +293,46 @@ wss.on('connection', (ws) => {
             if(char_role[1] != 'Good' && char_role['0'] != "Oberon")
               acc.push(key)
           }
-          ws.send("As an evil-doer, you know your fellow evildoers are " + acc.join(', '))
+          ws.send("As a hacker, you know your fellow hackers are " + acc.join(', '))
         }
         else if(role[0] == "Member"){
-          ws.send("As a member, you have no one revealed! Pay close attention to the conversation to try and get info")
+          ws.send("As a programmer, you have no one revealed! Pay close attention to the conversation to try and get info")
         }
         else if (role[0] == "Oberon")
-          ws.send("As Oberon, you don't know who your fellow evil-doers are! Pay close attention to the conversation to try and get info")
+          ws.send("As the lone wolf, you don't know who the other hackers are! Pay close attention to the conversation to try and get info")
 
         });
+        break;
+      case "/generate_quest":
+        ws.on("message", function(msg){
+          var parsed = JSON.parse(msg);
+          var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
+          rooms[parsed['room']]['quest'] = quest
+
+          delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
+
+          var clientQuest = {"name": quest["name"],
+                             "required_players": quest["required_players"],
+                             "flavor_text":quest["flavor_text"],
+                             "to_fail": quest["to_fail"],
+                             "times_tried": quest["times_tried"],
+                             "players": quest["players"]
+                   }
+
+          ws.send(JSON.stringify(clientQuest))
+
+        })
         break;
       case "/set_quest_members":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg)
           console.log(parsed)
-
+          rooms[parsed['room']]['quest']['party_members'] = parsed['']
+          for(var key in rooms[parsed['room']]["users"]){
+            var char_role = rooms[parsed['room']]['users'][key]['role'];
+            if(char_role[1] != 'Good' && char_role['0'] != "Oberon")
+              acc.push(key)
+          }
         });
         break;
 
@@ -252,8 +350,6 @@ wss.on('connection', (ws) => {
         for(var key in rooms[code]["users"]){
           rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
         }
-
-
       })
   }
   ws.on('close', () => {
@@ -274,6 +370,7 @@ wss.on('connection', (ws) => {
       if(Object.keys(rooms[code]["users"]).length == 0 )
       {
         delete rooms[dc[1]];
+        current_rooms.splice(current_rooms.indexOf(dc[1]), 1);
       }
       else
       {

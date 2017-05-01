@@ -44,6 +44,9 @@ charInfo = wsServer++"char_info"
 setQuestMembers : String
 setQuestMembers = wsServer++"set_quest_members"
 
+generateQuest : String
+generateQuest = wsServer++"generate_quest"
+
 -- Type definitions
 
 -- Define possible roles for players
@@ -83,7 +86,10 @@ type alias Quest =
   { name: String
   , playersRequired : Int
   , players : List String
-  , votes : Int
+  , votes : List Int
+  , flavorText : String
+  , timesTried: Int
+  , toFail: Int
   }
 
 -- MODEL
@@ -106,7 +112,7 @@ type alias Model =
 
 model : Model
 model =
-  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 "" (Quest "" 2 [] 0) ""
+  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 "" (Quest "" 2 [] [] "" 0 2) ""
 
 
 -- INIT
@@ -129,6 +135,7 @@ type Msg
     | RetrieveRole String
     | GenRoomCode
     | GenRoom String
+    | GenerateQuest String
     | SetRoom
     | Input String
     | Send
@@ -136,6 +143,29 @@ type Msg
     | SubmitQuestTeam
     | NewMessage String
     | CharInfo String
+
+
+questDecoder : Json.Decode.Decoder Quest
+questDecoder =
+  Json.Decode.map7
+    Quest
+    (Json.Decode.at ["name"] Json.Decode.string)
+    (Json.Decode.at ["required_players"] Json.Decode.int)
+    (Json.Decode.at ["players"] (Json.Decode.list Json.Decode.string))
+    (Json.Decode.at ["votes"] (Json.Decode.list Json.Decode.int))
+    (Json.Decode.at ["flavor_text"] Json.Decode.string)
+    (Json.Decode.at ["times_tried"] Json.Decode.int)
+    (Json.Decode.at ["to_fail"] Json.Decode.int)
+
+
+checkQuestDecoder : Result String Quest -> Model -> Model
+checkQuestDecoder decoded model=
+  case decoded of
+    Ok quest ->
+      {model | quest = quest, state=TeamBuild}
+
+    Err err->
+      {model | errors = "an error occurred decoding the quest"}
 
 getListPosition: List String -> Int -> String
 getListPosition list index =
@@ -225,8 +255,12 @@ update msg model =
       else
         (model, Cmd.none)
 
+    GenerateQuest response ->
+      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, Cmd.none)
+
     CharInfo response ->
-      ({model | revealedInfo = response, state = TeamBuild, errors = "", leaderPosition = (model.leaderPosition + 1) % List.length (model.currentPlayers)}, Cmd.none)
+      ({model | revealedInfo = response, errors = "", leaderPosition = (model.leaderPosition + 1) % List.length (model.currentPlayers)},
+      WebSocket.send generateQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name)])))
 
     RetrieveRole response ->
       ({model | user = parseRoleResponse response model.user},
@@ -240,9 +274,9 @@ update msg model =
 
     UpdateQuestTeam player ->
       if (List.member player model.quest.players) then
-        ({model | quest = Quest model.quest.name model.quest.playersRequired (List.Extra.remove player model.quest.players) model.quest.votes}, Cmd.none)
+        ({model | quest = Quest model.quest.name model.quest.playersRequired (List.Extra.remove player model.quest.players) model.quest.votes model.quest.flavorText model.quest.timesTried model.quest.toFail}, Cmd.none)
       else
-        ({model | quest = Quest model.quest.name model.quest.playersRequired (player::model.quest.players) model.quest.votes}, Cmd.none)
+        ({model | quest = Quest model.quest.name model.quest.playersRequired (player::model.quest.players) model.quest.votes model.quest.flavorText model.quest.timesTried model.quest.toFail}, Cmd.none)
 
     Send ->
       (model, WebSocket.send (wsServer ++ model.room)
@@ -255,7 +289,8 @@ update msg model =
 
     SubmitQuestTeam ->
       if model.quest.playersRequired == (List.length model.quest.players) then
-        ({model | errors = ""}, WebSocket.send setQuestMembers (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string model.room), ("players", Json.Encode.list (List.map string model.quest.players))])))
+        ({model | errors = ""}, WebSocket.send setQuestMembers
+        (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string model.room), ("players", Json.Encode.list (List.map string model.quest.players))])))
       else if model.quest.playersRequired > (List.length model.quest.players) then
         ({model | errors = "Need more players on this quest"}, Cmd.none)
       else
@@ -274,6 +309,7 @@ subscriptions model =
   , WebSocket.listen createRoles CreateRoles
   , WebSocket.listen retrieveRole RetrieveRole
   , WebSocket.listen charInfo CharInfo
+  , WebSocket.listen generateQuest GenerateQuest
   ]
   -- TODO: Add listeners for other
 
