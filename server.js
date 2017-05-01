@@ -323,25 +323,24 @@ wss.on('connection', (ws) => {
 
             delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
             rooms[parsed['room']['is_created']] = true;
-            console.log("QUEST HERE")
-            console.log(quest)
-          }
-          console.log("asdfasdfasdfasddfasdfasdfasdfasdfasdfasdfasdfasd")
-          while (!rooms[parsed['room']['is_created']]){
-            console.log("GUESS WE HERE NOW")
-          }
-          var clientQuest = {"name": rooms[parsed['room']['is_created']]["name"],
-                             "required_players": rooms[parsed['room']['is_created']]["required_players"],
-                             "flavor_text":rooms[parsed['room']['is_created']]["flavor_text"],
-                             "votes": {"yesVotes":[], "noVotes": []},
-                             "to_fail": rooms[parsed['room']['is_created']]["to_fail"],
-                             "times_tried": rooms[parsed['room']['is_created']]["times_tried"],
-                             "players": rooms[parsed['room']['is_created']]["players"]
-                   }
-          console.log(clientQuest)
-          ws.send(JSON.stringify(clientQuest))
 
-        })
+          }
+          ws.send("OK")
+        });
+        break;
+      case "/retrieve_quest":
+        ws.on("message", function(msg){
+          var parsed = JSON.parse(msg);
+          var clientQuest = {"name": rooms[parsed['room']]["name"],
+                             "required_players": rooms[parsed['room']]["required_players"],
+                             "flavor_text":rooms[parsed['room']]["flavor_text"],
+                             "votes": {"yesVotes":[], "noVotes": []},
+                             "to_fail": rooms[parsed['room']]["to_fail"],
+                             "times_tried": rooms[parsed['room']]["times_tried"],
+                             "players": rooms[parsed['room']]["players"]
+                   }
+          ws.send(JSON.stringify(clientQuest))
+        });
         break;
       case "/set_quest_members":
         ws.on("message", function(msg){

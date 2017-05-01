@@ -142,6 +142,7 @@ type Msg
     | GenRoomCode
     | GenRoom String
     | GenerateQuest String
+    | RetrieveQuest String
     | SetRoom
     | Input String
     | Send
@@ -262,8 +263,11 @@ update msg model =
       else
         (model, Cmd.none)
 
+    RetrieveQuest response ->
+      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, Cmd.none)
+
     GenerateQuest response ->
-      (model, WebSocket.send getQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
+        (model, WebSocket.send getQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room)])))
 
     CharInfo response ->
       ({model | revealedInfo = response, errors = "", leaderPosition = (model.leaderPosition + 1) % List.length (model.currentPlayers)},
@@ -317,6 +321,7 @@ subscriptions model =
   , WebSocket.listen retrieveRole RetrieveRole
   , WebSocket.listen charInfo CharInfo
   , WebSocket.listen generateQuest GenerateQuest
+  , WebSocket.listen getQuest RetrieveQuest
   ]
   -- TODO: Add listeners for other
 
