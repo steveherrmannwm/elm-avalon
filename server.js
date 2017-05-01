@@ -339,10 +339,6 @@ wss.on('connection', (ws) => {
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
           rooms[parsed['room']]['quest']['players'] = parsed['players'];
-
-          for(var key in rooms[parsed['room']]["users"]){
-            rooms[parsed['room']]['users'][key]['connections']['chat'].send(parsed['players']);
-          }
           ws.send("OK");
         });
         break;
@@ -350,6 +346,7 @@ wss.on('connection', (ws) => {
       case "/retrieve_quest_members":
         ws.on("message", function (msg){
           var parsed = JSON.parse(msg);
+
           ws.send("EHHEHEHEHHE")
         })
 
