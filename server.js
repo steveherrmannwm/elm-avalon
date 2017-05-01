@@ -340,7 +340,6 @@ wss.on('connection', (ws) => {
           var parsed = JSON.parse(msg);
           rooms[parsed['room']]['quest']['players'] = parsed['players'];
           console.log(rooms[parsed['room']])
-          ws.send("OK");
         });
         break;
 

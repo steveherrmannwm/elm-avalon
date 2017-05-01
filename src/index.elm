@@ -329,7 +329,7 @@ subscriptions model =
   , WebSocket.listen charInfo CharInfo
   , WebSocket.listen generateQuest GenerateQuest
   , WebSocket.listen retrieveQuest RetrieveQuest
-  , WebSocket.listen receiveQuestTeam ReceiveQuestTeam
+  , WebSocket.listen setQuestMembers ReceiveQuestTeam
   ]
   -- TODO: Add listeners for other
 
