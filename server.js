@@ -333,13 +333,13 @@ wss.on('connection', (ws) => {
           console.log(parsed)
           console.log(parsed['room'])
           console.log(rooms[parsed['room']])
-          var clientQuest = {"name": rooms[parsed['room']]["name"],
-                             "required_players": rooms[parsed['room']]["required_players"],
-                             "flavor_text":rooms[parsed['room']]["flavor_text"],
+          var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
+                             "required_players": rooms[parsed['room']]["quest"]["required_players"],
+                             "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
                              "votes": {"yesVotes":[], "noVotes": []},
-                             "to_fail": rooms[parsed['room']]["to_fail"],
-                             "times_tried": rooms[parsed['room']]["times_tried"],
-                             "players": rooms[parsed['room']]["players"]
+                             "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
+                             "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
+                             "players": rooms[parsed['room']]["quest"]["players"]
                    }
           console.log(clientQuest)
           ws.send(JSON.stringify(clientQuest))
