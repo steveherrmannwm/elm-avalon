@@ -11122,6 +11122,7 @@ var _steveherrmannwm$elm_avalon$Index$retrieveRole = A2(_elm_lang$core$Basics_op
 var _steveherrmannwm$elm_avalon$Index$charInfo = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'char_info');
 var _steveherrmannwm$elm_avalon$Index$setQuestMembers = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'set_quest_members');
 var _steveherrmannwm$elm_avalon$Index$generateQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'generate_quest');
+var _steveherrmannwm$elm_avalon$Index$getQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'get_quest');
 var _steveherrmannwm$elm_avalon$Index$Player = F3(
 	function (a, b, c) {
 		return {name: a, role: b, alignment: c};
@@ -11534,13 +11535,49 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 								})))
 				} : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'GenerateQuest':
-				return {
+				var _p9 = _p6._0;
+				return (!_elm_lang$core$Native_Utils.eq(_p9, 'GENERATED')) ? {
 					ctor: '_Tuple2',
 					_0: A2(
 						_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
-						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p6._0),
+						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p9),
 						model),
 					_1: _elm_lang$core$Platform_Cmd$none
+				} : {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(
+						_elm_lang$websocket$WebSocket$send,
+						_steveherrmannwm$elm_avalon$Index$getQuest,
+						A2(
+							_elm_lang$core$Json_Encode$encode,
+							0,
+							_elm_lang$core$Json_Encode$object(
+								{
+									ctor: '::',
+									_0: {
+										ctor: '_Tuple2',
+										_0: 'room',
+										_1: _elm_lang$core$Json_Encode$string(model.room)
+									},
+									_1: {
+										ctor: '::',
+										_0: {
+											ctor: '_Tuple2',
+											_0: 'roundNumber',
+											_1: _elm_lang$core$Json_Encode$int(model.currentRound)
+										},
+										_1: {
+											ctor: '::',
+											_0: {
+												ctor: '_Tuple2',
+												_0: 'maxPlayers',
+												_1: _elm_lang$core$Json_Encode$int(model.maxPlayers)
+											},
+											_1: {ctor: '[]'}
+										}
+									}
+								})))
 				};
 			case 'CharInfo':
 				return {
@@ -11638,8 +11675,8 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateQuestTeam':
-				var _p9 = _p6._0;
-				return A2(_elm_lang$core$List$member, _p9, model.quest.players) ? {
+				var _p10 = _p6._0;
+				return A2(_elm_lang$core$List$member, _p10, model.quest.players) ? {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
@@ -11648,7 +11685,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 								_steveherrmannwm$elm_avalon$Index$Quest,
 								model.quest.name,
 								model.quest.playersRequired,
-								A2(_elm_community$list_extra$List_Extra$remove, _p9, model.quest.players),
+								A2(_elm_community$list_extra$List_Extra$remove, _p10, model.quest.players),
 								model.quest.yesVotes,
 								model.quest.noVotes,
 								model.quest.flavorText,
@@ -11665,7 +11702,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 								_steveherrmannwm$elm_avalon$Index$Quest,
 								model.quest.name,
 								model.quest.playersRequired,
-								{ctor: '::', _0: _p9, _1: model.quest.players},
+								{ctor: '::', _0: _p10, _1: model.quest.players},
 								model.quest.yesVotes,
 								model.quest.noVotes,
 								model.quest.flavorText,
@@ -11798,7 +11835,7 @@ var _steveherrmannwm$elm_avalon$Index$Home = {ctor: 'Home'};
 var _steveherrmannwm$elm_avalon$Index$model = _steveherrmannwm$elm_avalon$Index$Model(
 	A3(_steveherrmannwm$elm_avalon$Index$Player, '', _steveherrmannwm$elm_avalon$Index$Unassigned, _steveherrmannwm$elm_avalon$Index$Unaligned))('')(5)(
 	{ctor: '[]'})('')(
-	{ctor: '[]'})(_steveherrmannwm$elm_avalon$Index$Home)(-1)(1)(0)('')(
+	{ctor: '[]'})(_steveherrmannwm$elm_avalon$Index$Home)(-1)(0)(0)('')(
 	A8(
 		_steveherrmannwm$elm_avalon$Index$Quest,
 		'',
@@ -11919,8 +11956,8 @@ var _steveherrmannwm$elm_avalon$Index$Name = function (a) {
 	return {ctor: 'Name', _0: a};
 };
 var _steveherrmannwm$elm_avalon$Index$view = function (model) {
-	var _p10 = model.state;
-	switch (_p10.ctor) {
+	var _p11 = model.state;
+	switch (_p11.ctor) {
 		case 'Home':
 			var selectEvent = A2(
 				_elm_lang$html$Html_Events$on,

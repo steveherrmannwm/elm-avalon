@@ -266,7 +266,7 @@ update msg model =
       if response /= "GENERATED" then
         (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, Cmd.none)
       else
-        (model, WebSocket.send getQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)]))))
+        (model, WebSocket.send getQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
 
     CharInfo response ->
       ({model | revealedInfo = response, errors = "", leaderPosition = (model.leaderPosition + 1) % List.length (model.currentPlayers)},
