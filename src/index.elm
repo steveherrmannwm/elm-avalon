@@ -50,6 +50,9 @@ generateQuest = wsServer++"generate_quest"
 retrieveQuest : String
 retrieveQuest = wsServer++"retrieve_quest"
 
+receiveQuestTeam : String
+receiveQuestTeam = wsServer++"retrieve_quest_members"
+
 -- Type definitions
 
 -- Define possible roles for players
@@ -147,6 +150,7 @@ type Msg
     | Input String
     | Send
     | UpdateQuestTeam String
+    | ReceiveQuestTeam String
     | SubmitQuestTeam
     | NewMessage String
     | CharInfo String
@@ -307,6 +311,9 @@ update msg model =
       else
         ({model | errors = "Too many players selected on quest"}, Cmd.none)
 
+    ReceiveQuestTeam response ->
+      ({model | errors = response}, Cmd.none)
+
 -- SUBSCRIPTIONS
 
 
@@ -322,6 +329,7 @@ subscriptions model =
   , WebSocket.listen charInfo CharInfo
   , WebSocket.listen generateQuest GenerateQuest
   , WebSocket.listen retrieveQuest RetrieveQuest
+  , WebSocket.listen receiveQuestTeam ReceiveQuestTeam
   ]
   -- TODO: Add listeners for other
 

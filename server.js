@@ -346,10 +346,11 @@ wss.on('connection', (ws) => {
           ws.send("OK");
         });
         break;
+
       case "/retrieve_quest_members":
         ws.on("message", function (msg){
           var parsed = JSON.parse(msg);
-
+          ws.send("EHHEHEHEHHE")
         })
 
   }

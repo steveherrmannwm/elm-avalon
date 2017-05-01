@@ -11123,6 +11123,7 @@ var _steveherrmannwm$elm_avalon$Index$charInfo = A2(_elm_lang$core$Basics_ops['+
 var _steveherrmannwm$elm_avalon$Index$setQuestMembers = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'set_quest_members');
 var _steveherrmannwm$elm_avalon$Index$generateQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'generate_quest');
 var _steveherrmannwm$elm_avalon$Index$retrieveQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'retrieve_quest');
+var _steveherrmannwm$elm_avalon$Index$receiveQuestTeam = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'retrieve_quest_members');
 var _steveherrmannwm$elm_avalon$Index$Player = F3(
 	function (a, b, c) {
 		return {name: a, role: b, alignment: c};
@@ -11758,7 +11759,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 									}
 								})))
 				};
-			default:
+			case 'SubmitQuestTeam':
 				return _elm_lang$core$Native_Utils.eq(
 					model.quest.playersRequired,
 					_elm_lang$core$List$length(model.quest.players)) ? {
@@ -11777,26 +11778,18 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 									ctor: '::',
 									_0: {
 										ctor: '_Tuple2',
-										_0: 'name',
-										_1: _elm_lang$core$Json_Encode$string(model.user.name)
+										_0: 'room',
+										_1: _elm_lang$core$Json_Encode$string(model.room)
 									},
 									_1: {
 										ctor: '::',
 										_0: {
 											ctor: '_Tuple2',
-											_0: 'room',
-											_1: _elm_lang$core$Json_Encode$string(model.room)
+											_0: 'players',
+											_1: _elm_lang$core$Json_Encode$list(
+												A2(_elm_lang$core$List$map, _elm_lang$core$Json_Encode$string, model.quest.players))
 										},
-										_1: {
-											ctor: '::',
-											_0: {
-												ctor: '_Tuple2',
-												_0: 'players',
-												_1: _elm_lang$core$Json_Encode$list(
-													A2(_elm_lang$core$List$map, _elm_lang$core$Json_Encode$string, model.quest.players))
-											},
-											_1: {ctor: '[]'}
-										}
+										_1: {ctor: '[]'}
 									}
 								})))
 				} : ((_elm_lang$core$Native_Utils.cmp(
@@ -11814,6 +11807,14 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 						{errors: 'Too many players selected on quest'}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				});
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{errors: _p6._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 		}
 	});
 var _steveherrmannwm$elm_avalon$Index$Home = {ctor: 'Home'};
@@ -11839,6 +11840,9 @@ var _steveherrmannwm$elm_avalon$Index$NewMessage = function (a) {
 	return {ctor: 'NewMessage', _0: a};
 };
 var _steveherrmannwm$elm_avalon$Index$SubmitQuestTeam = {ctor: 'SubmitQuestTeam'};
+var _steveherrmannwm$elm_avalon$Index$ReceiveQuestTeam = function (a) {
+	return {ctor: 'ReceiveQuestTeam', _0: a};
+};
 var _steveherrmannwm$elm_avalon$Index$UpdateQuestTeam = function (a) {
 	return {ctor: 'UpdateQuestTeam', _0: a};
 };
@@ -11930,7 +11934,11 @@ var _steveherrmannwm$elm_avalon$Index$subscriptions = function (model) {
 										_1: {
 											ctor: '::',
 											_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$retrieveQuest, _steveherrmannwm$elm_avalon$Index$RetrieveQuest),
-											_1: {ctor: '[]'}
+											_1: {
+												ctor: '::',
+												_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$receiveQuestTeam, _steveherrmannwm$elm_avalon$Index$ReceiveQuestTeam),
+												_1: {ctor: '[]'}
+											}
 										}
 									}
 								}
