@@ -315,13 +315,13 @@ wss.on('connection', (ws) => {
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
           if(!rooms[parsed['room']]['create_quest']){
-            rooms[parsed['room']]['is_created'] = false;
+            rooms[parsed['room']]['is_created'] = true;
             var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
             rooms[parsed['room']]['quest'] = quest
 
 
             delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
-            rooms[parsed['room']]['is_created'] = true;
+
           }
           ws.send("OK")
         });
