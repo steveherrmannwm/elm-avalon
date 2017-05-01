@@ -86,7 +86,8 @@ type alias Quest =
   { name: String
   , playersRequired : Int
   , players : List String
-  , votes : List Int
+  , yesVotes : List String
+  , noVotes : List String
   , flavorText : String
   , timesTried: Int
   , toFail: Int
@@ -114,7 +115,7 @@ type alias Model =
 
 model : Model
 model =
-  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 1 0"" (Quest "" 2 [] [] "" 0 2) ""
+  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 1 0"" (Quest "" 2 [] [] [] "" 0 2) ""
 
 
 -- INIT
@@ -149,12 +150,13 @@ type Msg
 
 questDecoder : Json.Decode.Decoder Quest
 questDecoder =
-  Json.Decode.map7
+  Json.Decode.map8
     Quest
     (Json.Decode.at ["name"] Json.Decode.string)
     (Json.Decode.at ["required_players"] Json.Decode.int)
     (Json.Decode.at ["players"] (Json.Decode.list Json.Decode.string))
-    (Json.Decode.at ["votes"] (Json.Decode.list Json.Decode.int))
+    (Json.Decode.at ["votes"] (Json.Decode.at ["yesVotes"] (Json.Decode.list Json.Decode.string)))
+    (Json.Decode.at ["votes"] (Json.Decode.at ["noVotes"] (Json.Decode.list Json.Decode.string)))
     (Json.Decode.at ["flavor_text"] Json.Decode.string)
     (Json.Decode.at ["times_tried"] Json.Decode.int)
     (Json.Decode.at ["to_fail"] Json.Decode.int)
@@ -167,7 +169,7 @@ checkQuestDecoder decoded model=
       {model | quest = quest, state=TeamBuild}
 
     Err err->
-      {model | errors = "an error occurred decoding the quest"}
+      {model | errors = err}
 
 getListPosition: List String -> Int -> String
 getListPosition list index =
@@ -276,9 +278,9 @@ update msg model =
 
     UpdateQuestTeam player ->
       if (List.member player model.quest.players) then
-        ({model | quest = Quest model.quest.name model.quest.playersRequired (List.Extra.remove player model.quest.players) model.quest.votes model.quest.flavorText model.quest.timesTried model.quest.toFail}, Cmd.none)
+        ({model | quest = Quest model.quest.name model.quest.playersRequired (List.Extra.remove player model.quest.players) model.quest.yesVotes model.quest.noVotes model.quest.flavorText model.quest.timesTried model.quest.toFail}, Cmd.none)
       else
-        ({model | quest = Quest model.quest.name model.quest.playersRequired (player::model.quest.players) model.quest.votes model.quest.flavorText model.quest.timesTried model.quest.toFail}, Cmd.none)
+        ({model | quest = Quest model.quest.name model.quest.playersRequired (player::model.quest.players) model.quest.yesVotes model.quest.noVotes model.quest.flavorText model.quest.timesTried model.quest.toFail}, Cmd.none)
 
     Send ->
       (model, WebSocket.send (wsServer ++ model.room)

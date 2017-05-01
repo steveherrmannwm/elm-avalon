@@ -11126,12 +11126,12 @@ var _steveherrmannwm$elm_avalon$Index$Player = F3(
 	function (a, b, c) {
 		return {name: a, role: b, alignment: c};
 	});
-var _steveherrmannwm$elm_avalon$Index$Quest = F7(
-	function (a, b, c, d, e, f, g) {
-		return {name: a, playersRequired: b, players: c, votes: d, flavorText: e, timesTried: f, toFail: g};
+var _steveherrmannwm$elm_avalon$Index$Quest = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {name: a, playersRequired: b, players: c, yesVotes: d, noVotes: e, flavorText: f, timesTried: g, toFail: h};
 	});
-var _steveherrmannwm$elm_avalon$Index$questDecoder = A8(
-	_elm_lang$core$Json_Decode$map7,
+var _steveherrmannwm$elm_avalon$Index$questDecoder = A9(
+	_elm_lang$core$Json_Decode$map8,
 	_steveherrmannwm$elm_avalon$Index$Quest,
 	A2(
 		_elm_lang$core$Json_Decode$at,
@@ -11164,7 +11164,29 @@ var _steveherrmannwm$elm_avalon$Index$questDecoder = A8(
 			_0: 'votes',
 			_1: {ctor: '[]'}
 		},
-		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$int)),
+		A2(
+			_elm_lang$core$Json_Decode$at,
+			{
+				ctor: '::',
+				_0: 'yesVotes',
+				_1: {ctor: '[]'}
+			},
+			_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string))),
+	A2(
+		_elm_lang$core$Json_Decode$at,
+		{
+			ctor: '::',
+			_0: 'votes',
+			_1: {ctor: '[]'}
+		},
+		A2(
+			_elm_lang$core$Json_Decode$at,
+			{
+				ctor: '::',
+				_0: 'noVotes',
+				_1: {ctor: '[]'}
+			},
+			_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string))),
 	A2(
 		_elm_lang$core$Json_Decode$at,
 		{
@@ -11311,7 +11333,7 @@ var _steveherrmannwm$elm_avalon$Index$checkQuestDecoder = F2(
 		} else {
 			return _elm_lang$core$Native_Utils.update(
 				model,
-				{errors: 'an error occurred decoding the quest'});
+				{errors: _p5._0});
 		}
 	});
 var _steveherrmannwm$elm_avalon$Index$Setup = {ctor: 'Setup'};
@@ -11622,12 +11644,13 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							quest: A7(
+							quest: A8(
 								_steveherrmannwm$elm_avalon$Index$Quest,
 								model.quest.name,
 								model.quest.playersRequired,
 								A2(_elm_community$list_extra$List_Extra$remove, _p9, model.quest.players),
-								model.quest.votes,
+								model.quest.yesVotes,
+								model.quest.noVotes,
 								model.quest.flavorText,
 								model.quest.timesTried,
 								model.quest.toFail)
@@ -11638,12 +11661,13 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							quest: A7(
+							quest: A8(
 								_steveherrmannwm$elm_avalon$Index$Quest,
 								model.quest.name,
 								model.quest.playersRequired,
 								{ctor: '::', _0: _p9, _1: model.quest.players},
-								model.quest.votes,
+								model.quest.yesVotes,
+								model.quest.noVotes,
 								model.quest.flavorText,
 								model.quest.timesTried,
 								model.quest.toFail)
@@ -11775,10 +11799,11 @@ var _steveherrmannwm$elm_avalon$Index$model = _steveherrmannwm$elm_avalon$Index$
 	A3(_steveherrmannwm$elm_avalon$Index$Player, '', _steveherrmannwm$elm_avalon$Index$Unassigned, _steveherrmannwm$elm_avalon$Index$Unaligned))('')(5)(
 	{ctor: '[]'})('')(
 	{ctor: '[]'})(_steveherrmannwm$elm_avalon$Index$Home)(-1)(1)(0)('')(
-	A7(
+	A8(
 		_steveherrmannwm$elm_avalon$Index$Quest,
 		'',
 		2,
+		{ctor: '[]'},
 		{ctor: '[]'},
 		{ctor: '[]'},
 		'',

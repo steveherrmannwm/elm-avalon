@@ -202,7 +202,7 @@ wss.on('connection', (ws) => {
                      "available_quests": quests,
                      "quest": {"name": "", "required_players": 2, "flavor_text":"",
                                "to_fail": 1, "on_success":"", "on_fail":"", "times_tried": 0,
-                               "players": []
+                               "players": [], "votes" : {"yesVotes": [], "noVotes": []}
                               }}
       current_rooms.push("/"+code)
       });
@@ -320,6 +320,7 @@ wss.on('connection', (ws) => {
           var clientQuest = {"name": quest["name"],
                              "required_players": quest["required_players"],
                              "flavor_text":quest["flavor_text"],
+                             "votes": {"yesVotes":{}, "noVotes": {}},
                              "to_fail": quest["to_fail"],
                              "times_tried": quest["times_tried"],
                              "players": quest["players"]
