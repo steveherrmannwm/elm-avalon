@@ -332,6 +332,9 @@ wss.on('connection', (ws) => {
             console.log(clientQuest)
             ws.send(JSON.stringify(clientQuest))
           }
+          else {
+            ws.send("GENERATED");
+          }
         })
         break;
       case "/set_quest_members":

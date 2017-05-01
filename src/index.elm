@@ -47,6 +47,9 @@ setQuestMembers = wsServer++"set_quest_members"
 generateQuest : String
 generateQuest = wsServer++"generate_quest"
 
+getQuest : String
+getQuest = wsServer++"get_quest"
+
 -- Type definitions
 
 -- Define possible roles for players
@@ -260,7 +263,10 @@ update msg model =
         (model, Cmd.none)
 
     GenerateQuest response ->
-      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, Cmd.none)
+      if response != "GENERATED" then
+        (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, Cmd.none)
+      else
+        (model, WebSocket.send getQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)]))))
 
     CharInfo response ->
       ({model | revealedInfo = response, errors = "", leaderPosition = (model.leaderPosition + 1) % List.length (model.currentPlayers)},
