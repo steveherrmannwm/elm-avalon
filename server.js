@@ -157,6 +157,9 @@ function generateQuest(roundNumber, maxPlayers, questTexts){
   var keys = Object.keys(questTexts)
   var key = Object.keys(questTexts)[Math.random() * keys.length];
 
+  console.log(key)
+  console.log(questTexts[key])
+
   return {"name": key,
           "required_players": quest_template["players"],
           "flavor_text": questTexts[key]["flavor_text"],
