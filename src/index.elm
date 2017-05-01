@@ -312,7 +312,7 @@ update msg model =
         ({model | errors = "Too many players selected on quest"}, Cmd.none)
 
     ReceiveQuestTeam response ->
-      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) {model | state = Vote}, Cmd.none)
+      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model , Cmd.none)
 -- SUBSCRIPTIONS
 
 
@@ -370,7 +370,7 @@ view model =
           if getListPosition model.currentPlayers model.leaderPosition ==  model.user.name then
             [div [] [ text ("You're the current quest leader. Please select " ++ toString model.quest.playersRequired ++ " players to go on the quest")]
             ,div [] [(fieldset [] (List.map createCheckboxes model.currentPlayers))]
-            ,button [onClick SubmitQuestTeam] [ text ("Submit Quest Players")]
+            ,button [ type_ "button", onClick SubmitQuestTeam] [ text ("Submit Quest Players")]
             ]
           else
             [div [] [text ("Waiting for "++ getListPosition model.currentPlayers model.leaderPosition ++ " to finish selecting a team")]]
