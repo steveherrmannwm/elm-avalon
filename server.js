@@ -316,7 +316,7 @@ wss.on('connection', (ws) => {
           var parsed = JSON.parse(msg);
           if(!rooms[parsed['room']]['create_quest']){
             rooms[parsed['room']]['create_quest'] = true;
-            rooms[parsed['room']]['is_created'] = false;
+            rooms[parsed['room']]['is_created'] = true;
             var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
             rooms[parsed['room']]['quest'] = quest
 
