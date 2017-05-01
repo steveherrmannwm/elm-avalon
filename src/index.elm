@@ -313,7 +313,7 @@ update msg model =
 
     ReceiveQuestTeam response ->
       if response /= "registered" then
-        (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, Cmd.none)
+        (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | state = Vote}), Cmd.none)
       else
         (model, Cmd.none)
 -- SUBSCRIPTIONS

@@ -11837,7 +11837,9 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_0: A2(
 						_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
 						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p10),
-						model),
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{state: _steveherrmannwm$elm_avalon$Index$Vote})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				} : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
