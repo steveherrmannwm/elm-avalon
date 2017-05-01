@@ -11200,7 +11200,9 @@ var _steveherrmannwm$elm_avalon$Index$Model = function (a) {
 								return function (i) {
 									return function (j) {
 										return function (k) {
-											return {user: a, room: b, maxPlayers: c, currentPlayers: d, chatBox: e, chatMessages: f, state: g, leaderPosition: h, revealedInfo: i, quest: j, errors: k};
+											return function (l) {
+												return {user: a, room: b, maxPlayers: c, currentPlayers: d, chatBox: e, chatMessages: f, state: g, leaderPosition: h, currentRound: i, revealedInfo: j, quest: k, errors: l};
+											};
 										};
 									};
 								};
@@ -11762,7 +11764,7 @@ var _steveherrmannwm$elm_avalon$Index$Home = {ctor: 'Home'};
 var _steveherrmannwm$elm_avalon$Index$model = _steveherrmannwm$elm_avalon$Index$Model(
 	A3(_steveherrmannwm$elm_avalon$Index$Player, '', _steveherrmannwm$elm_avalon$Index$Unassigned, _steveherrmannwm$elm_avalon$Index$Unaligned))('')(5)(
 	{ctor: '[]'})('')(
-	{ctor: '[]'})(_steveherrmannwm$elm_avalon$Index$Home)(-1)('')(
+	{ctor: '[]'})(_steveherrmannwm$elm_avalon$Index$Home)(-1)(1)('')(
 	A7(
 		_steveherrmannwm$elm_avalon$Index$Quest,
 		'',
