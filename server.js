@@ -315,7 +315,6 @@ wss.on('connection', (ws) => {
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
           if(!rooms[parsed['room']]['create_quest']){
-            rooms[parsed['room']]['create_quest'] = true;
             rooms[parsed['room']]['is_created'] = true;
             var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
             rooms[parsed['room']]['quest'] = quest
@@ -325,6 +324,7 @@ wss.on('connection', (ws) => {
             rooms[parsed['room']]['is_created'] = true;
             console.log("HERE")
           }
+          console.log("ASDFSDAFSDAFSAFD");
           ws.send("OK")
         });
         break;
