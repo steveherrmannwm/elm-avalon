@@ -104,7 +104,8 @@ type alias Model =
   , chatMessages : List String
   , state : GameState
   , leaderPosition : Int
-  , currentRound :Int
+  , currentRound : Int
+  , evilVictories : Int
   , revealedInfo : String
   , quest : Quest
   , errors : String
@@ -113,7 +114,7 @@ type alias Model =
 
 model : Model
 model =
-  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 1 "" (Quest "" 2 [] [] "" 0 2) ""
+  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 1 0"" (Quest "" 2 [] [] "" 0 2) ""
 
 
 -- INIT
@@ -261,7 +262,7 @@ update msg model =
 
     CharInfo response ->
       ({model | revealedInfo = response, errors = "", leaderPosition = (model.leaderPosition + 1) % List.length (model.currentPlayers)},
-      WebSocket.send generateQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", int model.currentRound), ("maxPlayers", int model.maxPlayers)])))
+      WebSocket.send generateQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
 
     RetrieveRole response ->
       ({model | user = parseRoleResponse response model.user},
