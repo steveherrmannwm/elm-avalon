@@ -374,7 +374,7 @@ view model =
       , div [] [text (model.quest.name)]
       , div [] [text (model.quest.flavorText)]
       , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
-      , div [] [text ("You've tried to complete " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
+      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
       , div [] (List.map viewMessage (List.reverse model.chatMessages))
       , div [] [text (model.revealedInfo)]
       , div [] selectionBlock
