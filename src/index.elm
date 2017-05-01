@@ -115,7 +115,7 @@ type alias Model =
 
 model : Model
 model =
-  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 1 0 "" (Quest "" 2 [] [] [] "" 0 2) ""
+  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 0 0 "" (Quest "" 2 [] [] [] "" 0 2) ""
 
 
 -- INIT

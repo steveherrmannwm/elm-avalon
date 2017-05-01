@@ -200,6 +200,7 @@ wss.on('connection', (ws) => {
       rooms[code] = {"users": {},
                      "roles": false,
                      "available_quests": quests,
+                     "create_quest": false,
                      "quest": {"name": "", "required_players": 2, "flavor_text":"",
                                "to_fail": 1, "on_success":"", "on_fail":"", "times_tried": 0,
                                "players": [], "votes" : {"yesVotes": [], "noVotes": []}
@@ -312,22 +313,25 @@ wss.on('connection', (ws) => {
       case "/generate_quest":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
-          var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
-          rooms[parsed['room']]['quest'] = quest
+          if(!rooms[parsed['room']]['create_quest']){
+            rooms[parsed['room']]['create_quest'] = true;
+            var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
+            rooms[parsed['room']]['quest'] = quest
 
-          delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
 
-          var clientQuest = {"name": quest["name"],
-                             "required_players": quest["required_players"],
-                             "flavor_text":quest["flavor_text"],
-                             "votes": {"yesVotes":[], "noVotes": []},
-                             "to_fail": quest["to_fail"],
-                             "times_tried": quest["times_tried"],
-                             "players": quest["players"]
-                   }
-          console.log(clientQuest)
-          ws.send(JSON.stringify(clientQuest))
+            delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
 
+            var clientQuest = {"name": quest["name"],
+                               "required_players": quest["required_players"],
+                               "flavor_text":quest["flavor_text"],
+                               "votes": {"yesVotes":[], "noVotes": []},
+                               "to_fail": quest["to_fail"],
+                               "times_tried": quest["times_tried"],
+                               "players": quest["players"]
+                     }
+            console.log(clientQuest)
+            ws.send(JSON.stringify(clientQuest))
+          }
         })
         break;
       case "/set_quest_members":
