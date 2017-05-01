@@ -11542,7 +11542,30 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 						_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
 						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p6._0),
 						model),
-					_1: _elm_lang$core$Platform_Cmd$none
+					_1: A2(
+						_elm_lang$websocket$WebSocket$send,
+						_steveherrmannwm$elm_avalon$Index$setQuestMembers,
+						A2(
+							_elm_lang$core$Json_Encode$encode,
+							0,
+							_elm_lang$core$Json_Encode$object(
+								{
+									ctor: '::',
+									_0: {
+										ctor: '_Tuple2',
+										_0: 'room',
+										_1: _elm_lang$core$Json_Encode$string(model.room)
+									},
+									_1: {
+										ctor: '::',
+										_0: {
+											ctor: '_Tuple2',
+											_0: 'user',
+											_1: _elm_lang$core$Json_Encode$string(model.user.name)
+										},
+										_1: {ctor: '[]'}
+									}
+								})))
 				};
 			case 'GenerateQuest':
 				return {

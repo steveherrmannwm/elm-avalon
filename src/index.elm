@@ -268,7 +268,7 @@ update msg model =
         (model, Cmd.none)
 
     RetrieveQuest response ->
-      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, Cmd.none)
+      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, WebSocket.send setQuestMembers (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name)])))
 
     GenerateQuest response ->
         (model, WebSocket.send retrieveQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room)])))

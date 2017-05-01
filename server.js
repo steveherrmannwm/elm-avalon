@@ -194,7 +194,7 @@ wss.on('connection', (ws) => {
     ws.on('message', function(msg) {
       var code = "";
       while(code == "" || Object.keys(rooms).indexOf(code) > 1){
-        code = randomString(5, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        code = randomString(5, '23456789abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ') // Took out 0,1,o,l
       }
       ws.send(code)
       rooms[code] = {"users": {},
@@ -204,7 +204,8 @@ wss.on('connection', (ws) => {
                      "quest": {"name": "", "required_players": 2, "flavor_text":"",
                                "to_fail": 1, "on_success":"", "on_fail":"", "times_tried": 0,
                                "players": [], "votes" : {"yesVotes": [], "noVotes": []}
-                              }}
+                              }
+                    }
       current_rooms.push("/"+code)
       });
       break;
@@ -321,6 +322,7 @@ wss.on('connection', (ws) => {
           ws.send("OK")
         });
         break;
+
       case "/retrieve_quest":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
@@ -331,25 +333,27 @@ wss.on('connection', (ws) => {
                              "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
                              "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
                              "players": rooms[parsed['room']]["quest"]["players"]
-                   }
+                           }
           ws.send(JSON.stringify(clientQuest))
         });
         break;
+
       case "/set_quest_members":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
-          rooms[parsed['room']]['quest']['players'] = parsed['players'];
-          console.log(rooms[parsed['room']])
-          ws.send("RE")
+          if (parsed["user"])
+          {
+            rooms[parsed['room']]['users'][parsed['user']]['connections']['quest_members'] = ws;
+            ws.send([])
+          }
+          else{
+            rooms[parsed['room']]['quest']['players'] = parsed['players'];
+            for(var key in rooms[code]["users"]){
+              rooms[code]["users"][key]["connections"]["quest_members"].send(parsed['players']);
+            }
+          }
         });
         break;
-
-      case "/retrieve_quest_members":
-        ws.on("message", function (msg){
-          var parsed = JSON.parse(msg);
-
-          ws.send("EHHEHEHEHHE")
-        })
 
   }
 
