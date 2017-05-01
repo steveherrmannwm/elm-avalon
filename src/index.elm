@@ -381,11 +381,11 @@ view model =
       div []
       [ input [onInput Input, placeholder "Chat with others!"] []
       , button [onClick Send] [text "Send"]
+      , div [] (List.map viewMessage (List.reverse model.chatMessages))
       , div [] [text (model.quest.name)]
       , div [] [text (model.quest.flavorText)]
       , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
       , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
-      , div [] (List.map viewMessage (List.reverse model.chatMessages))
       , div [] [text (model.revealedInfo)]
       , div [] selectionBlock
       , div [] [text model.errors]
@@ -393,11 +393,12 @@ view model =
     Vote -> div []
       [ input [onInput Input, placeholder "Chat with others!"] []
       , button [onClick Send] [text "Send"]
+      , div [] (List.map viewMessage (List.reverse model.chatMessages))
       , div [] [text (model.quest.name)]
       , div [] [text (model.quest.flavorText)]
       , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
+      , div [] [text ("The proposed team is " ++ (appendToComma (List.head model.quest.players) (List.drop 1 model.quest.players) ""))]
       , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
-      , div [] (List.map viewMessage (List.reverse model.chatMessages))
       , div [] [text (model.revealedInfo)]
       , div [] [text model.errors]
       ]
@@ -423,6 +424,12 @@ view model =
       [ input [onInput Input, placeholder "Chat with others!"] []
       , button [onClick Send] [text "Send"]
       , div [] (List.map viewMessage (List.reverse model.chatMessages))]
+
+appendToComma : Maybe String -> List String -> String -> String
+appendToComma head tail acc =
+  case head of
+    Just str -> (appendToComma (List.head tail) (List.drop 1 tail) (str ++ ", " ++ acc))
+    Nothing -> String.dropRight 2 acc -- Remove the last comma
 
 viewMessage : String -> Html msg
 viewMessage msg =
