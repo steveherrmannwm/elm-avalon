@@ -341,9 +341,11 @@ wss.on('connection', (ws) => {
       case "/set_quest_members":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
+          console.log("EH")
           if (parsed["user"])
           {
             rooms[parsed['room']]['users'][parsed['user']]['connections']['quest_members'] = ws;
+            console.log("user")
             ws.send([])
           }
           else{
@@ -356,6 +358,7 @@ wss.on('connection', (ws) => {
                                "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
                                "players": rooms[parsed['room']]["quest"]["players"]
                              }
+            console.log("DSF")
             for(var key in rooms[parsed['room']]["users"]){
               rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(clientQuest);
             }
