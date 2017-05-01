@@ -358,7 +358,7 @@ wss.on('connection', (ws) => {
                                "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
                                "players": rooms[parsed['room']]["quest"]["players"]
                              }
-            console.log("DSF")
+            console.log(rooms[parsed['room']]['users'])
             for(var key in rooms[parsed['room']]["users"]){
               rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(clientQuest);
             }
