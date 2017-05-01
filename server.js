@@ -153,7 +153,7 @@ function generateQuest(roundNumber, maxPlayers, questTexts){
                       ]
                  };
   var quest_template = templates[maxPlayers][roundNumber];
-
+  console.log(questTexts)
   var keys = Object.keys(questTexts)
   var key = Object.keys(questTexts)[Math.random() * keys.length];
 
