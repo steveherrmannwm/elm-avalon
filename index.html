@@ -11534,6 +11534,15 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 									}
 								})))
 				} : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'RetrieveQuest':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(
+						_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
+						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p6._0),
+						model),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'GenerateQuest':
 				return {
 					ctor: '_Tuple2',
@@ -11552,23 +11561,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 										_0: 'room',
 										_1: _elm_lang$core$Json_Encode$string(model.room)
 									},
-									_1: {
-										ctor: '::',
-										_0: {
-											ctor: '_Tuple2',
-											_0: 'roundNumber',
-											_1: _elm_lang$core$Json_Encode$int(model.currentRound)
-										},
-										_1: {
-											ctor: '::',
-											_0: {
-												ctor: '_Tuple2',
-												_0: 'maxPlayers',
-												_1: _elm_lang$core$Json_Encode$int(model.maxPlayers)
-											},
-											_1: {ctor: '[]'}
-										}
-									}
+									_1: {ctor: '[]'}
 								})))
 				};
 			case 'CharInfo':
@@ -11880,6 +11873,9 @@ var _steveherrmannwm$elm_avalon$Index$Input = function (a) {
 	return {ctor: 'Input', _0: a};
 };
 var _steveherrmannwm$elm_avalon$Index$SetRoom = {ctor: 'SetRoom'};
+var _steveherrmannwm$elm_avalon$Index$RetrieveQuest = function (a) {
+	return {ctor: 'RetrieveQuest', _0: a};
+};
 var _steveherrmannwm$elm_avalon$Index$GenerateQuest = function (a) {
 	return {ctor: 'GenerateQuest', _0: a};
 };
@@ -11931,7 +11927,11 @@ var _steveherrmannwm$elm_avalon$Index$subscriptions = function (model) {
 									_1: {
 										ctor: '::',
 										_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$generateQuest, _steveherrmannwm$elm_avalon$Index$GenerateQuest),
-										_1: {ctor: '[]'}
+										_1: {
+											ctor: '::',
+											_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$getQuest, _steveherrmannwm$elm_avalon$Index$RetrieveQuest),
+											_1: {ctor: '[]'}
+										}
 									}
 								}
 							}
