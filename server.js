@@ -201,6 +201,7 @@ wss.on('connection', (ws) => {
                      "roles": false,
                      "available_quests": quests,
                      "create_quest": false,
+                     "is_created": false,
                      "quest": {"name": "", "required_players": 2, "flavor_text":"",
                                "to_fail": 1, "on_success":"", "on_fail":"", "times_tried": 0,
                                "players": [], "votes" : {"yesVotes": [], "noVotes": []}
@@ -315,11 +316,16 @@ wss.on('connection', (ws) => {
           var parsed = JSON.parse(msg);
           if(!rooms[parsed['room']]['create_quest']){
             rooms[parsed['room']]['create_quest'] = true;
+            rooms[parsed['room']]['is_created'] = false;
             var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
             rooms[parsed['room']]['quest'] = quest
 
 
             delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
+            rooms[parsed['room']['is_created']] = true;
+          }
+          while (!rooms[parsed['room']['is_created']]){
+
           }
           var clientQuest = {"name": quest["name"],
                              "required_players": quest["required_players"],
