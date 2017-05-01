@@ -331,6 +331,8 @@ wss.on('connection', (ws) => {
           var parsed = JSON.parse(msg);
           console.log(rooms)
           console.log(parsed)
+          console.log(parsed['room'])
+          console.log(rooms[parsed['room']])
           var clientQuest = {"name": rooms[parsed['room']]["name"],
                              "required_players": rooms[parsed['room']]["required_players"],
                              "flavor_text":rooms[parsed['room']]["flavor_text"],
