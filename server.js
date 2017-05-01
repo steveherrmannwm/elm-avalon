@@ -57,6 +57,15 @@ function findObject(obj, list) {
     return -1;
 }
 
+function pickRandomProperty(obj) {
+    var result;
+    var count = 0;
+    for (var prop in obj)
+        if (Math.random() < 1/++count)
+           result = prop;
+    return result;
+}
+
 function generateRoles(players)
 {
   var roles = {"good": ["Member", "Percival"],
@@ -153,15 +162,7 @@ function generateQuest(roundNumber, maxPlayers, questTexts){
                       ]
                  };
   var quest_template = templates[maxPlayers][roundNumber];
-  console.log(questTexts)
-  console.log("EHEHEHEHEHE")
-  var keys = Object.keys(questTexts)
-  console.log(keys)
-  var key = keys[Math.random() * keys.length];
-
-  console.log(key)
-  console.log(questTexts[key])
-
+  var key = pickRandomProperty(questTexts)
   return {"name": key,
           "required_players": quest_template["players"],
           "flavor_text": questTexts[key]["flavor_text"],
