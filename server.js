@@ -322,15 +322,12 @@ wss.on('connection', (ws) => {
 
             delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
             rooms[parsed['room']]['is_created'] = true;
-            console.log("HERE")
           }
-          console.log("ASDFSDAFSDAFSAFD");
           ws.send("OK")
         });
         break;
       case "/retrieve_quest":
         ws.on("message", function(msg){
-          console.log("HERHEERERERE")
           var parsed = JSON.parse(msg);
           var clientQuest = {"name": rooms[parsed['room']]["name"],
                              "required_players": rooms[parsed['room']]["required_players"],
@@ -340,6 +337,7 @@ wss.on('connection', (ws) => {
                              "times_tried": rooms[parsed['room']]["times_tried"],
                              "players": rooms[parsed['room']]["players"]
                    }
+          console.log(clientQuest)
           ws.send(JSON.stringify(clientQuest))
         });
         break;
