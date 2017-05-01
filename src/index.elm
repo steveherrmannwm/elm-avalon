@@ -47,8 +47,8 @@ setQuestMembers = wsServer++"set_quest_members"
 generateQuest : String
 generateQuest = wsServer++"generate_quest"
 
-getQuest : String
-getQuest = wsServer++"get_quest"
+retrieveQuest : String
+retrieveQuest = wsServer++"retrieve_quest"
 
 -- Type definitions
 
@@ -267,7 +267,7 @@ update msg model =
       (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, Cmd.none)
 
     GenerateQuest response ->
-        (model, WebSocket.send getQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room)])))
+        (model, WebSocket.send retrieveQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room)])))
 
     CharInfo response ->
       ({model | revealedInfo = response, errors = "", leaderPosition = (model.leaderPosition + 1) % List.length (model.currentPlayers)},
@@ -321,7 +321,7 @@ subscriptions model =
   , WebSocket.listen retrieveRole RetrieveRole
   , WebSocket.listen charInfo CharInfo
   , WebSocket.listen generateQuest GenerateQuest
-  , WebSocket.listen getQuest RetrieveQuest
+  , WebSocket.listen retrieveQuest RetrieveQuest
   ]
   -- TODO: Add listeners for other
 

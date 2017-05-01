@@ -11122,7 +11122,7 @@ var _steveherrmannwm$elm_avalon$Index$retrieveRole = A2(_elm_lang$core$Basics_op
 var _steveherrmannwm$elm_avalon$Index$charInfo = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'char_info');
 var _steveherrmannwm$elm_avalon$Index$setQuestMembers = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'set_quest_members');
 var _steveherrmannwm$elm_avalon$Index$generateQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'generate_quest');
-var _steveherrmannwm$elm_avalon$Index$getQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'get_quest');
+var _steveherrmannwm$elm_avalon$Index$retrieveQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'retrieve_quest');
 var _steveherrmannwm$elm_avalon$Index$Player = F3(
 	function (a, b, c) {
 		return {name: a, role: b, alignment: c};
@@ -11549,7 +11549,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_0: model,
 					_1: A2(
 						_elm_lang$websocket$WebSocket$send,
-						_steveherrmannwm$elm_avalon$Index$getQuest,
+						_steveherrmannwm$elm_avalon$Index$retrieveQuest,
 						A2(
 							_elm_lang$core$Json_Encode$encode,
 							0,
@@ -11929,7 +11929,7 @@ var _steveherrmannwm$elm_avalon$Index$subscriptions = function (model) {
 										_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$generateQuest, _steveherrmannwm$elm_avalon$Index$GenerateQuest),
 										_1: {
 											ctor: '::',
-											_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$getQuest, _steveherrmannwm$elm_avalon$Index$RetrieveQuest),
+											_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$retrieveQuest, _steveherrmannwm$elm_avalon$Index$RetrieveQuest),
 											_1: {ctor: '[]'}
 										}
 									}
