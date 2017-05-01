@@ -231,7 +231,6 @@ wss.on('connection', (ws) => {
     case "/player_list":
       ws.on("message", function(msg){
         var parsed = JSON.parse(msg)
-        console.log(Object.keys(rooms[parsed["room"]]["users"]))
         ws.send(Object.keys(rooms[parsed["room"]]["users"]).join(","))
       });
       break;
@@ -261,7 +260,6 @@ wss.on('connection', (ws) => {
     case "/retrieve_role":
       ws.on("message", function(msg){
         var parsed = JSON.parse(msg)
-        console.log(Object.keys(rooms[parsed["room"]]["users"]))
         ws.send(rooms[parsed["room"]]["users"][parsed['user']]['role'].join(","))
       });
       break;
@@ -318,23 +316,14 @@ wss.on('connection', (ws) => {
             var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
             rooms[parsed['room']]['quest'] = quest
 
-
             delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
-
           }
           ws.send("OK")
-          console.log("HEYO")
-          console.log(quests)
-          console.log("END QUESTS")
         });
         break;
       case "/retrieve_quest":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
-          console.log(rooms)
-          console.log(parsed)
-          console.log(parsed['room'])
-          console.log(rooms[parsed['room']])
           var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
                              "required_players": rooms[parsed['room']]["quest"]["required_players"],
                              "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
@@ -343,22 +332,25 @@ wss.on('connection', (ws) => {
                              "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
                              "players": rooms[parsed['room']]["quest"]["players"]
                    }
-          console.log(clientQuest)
           ws.send(JSON.stringify(clientQuest))
         });
         break;
       case "/set_quest_members":
         ws.on("message", function(msg){
-          var parsed = JSON.parse(msg)
-          console.log(parsed)
-          rooms[parsed['room']]['quest']['party_members'] = parsed['']
+          var parsed = JSON.parse(msg);
+          rooms[parsed['room']]['quest']['players'] = parsed['players'];
+
           for(var key in rooms[parsed['room']]["users"]){
-            var char_role = rooms[parsed['room']]['users'][key]['role'];
-            if(char_role[1] != 'Good' && char_role['0'] != "Oberon")
-              acc.push(key)
+            rooms[parsed['room']]['users'][key]['connections']['chat'].send(parsed['players']);
           }
+          ws.send("OK");
         });
         break;
+      case "/retrieve_quest_members":
+        ws.on("message", function (msg){
+          var parsed = JSON.parse(msg);
+
+        })
 
   }
 

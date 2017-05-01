@@ -301,7 +301,7 @@ update msg model =
     SubmitQuestTeam ->
       if model.quest.playersRequired == (List.length model.quest.players) then
         ({model | errors = ""}, WebSocket.send setQuestMembers
-        (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string model.room), ("players", Json.Encode.list (List.map string model.quest.players))])))
+        (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("players", Json.Encode.list (List.map string model.quest.players))])))
       else if model.quest.playersRequired > (List.length model.quest.players) then
         ({model | errors = "Need more players on this quest"}, Cmd.none)
       else
