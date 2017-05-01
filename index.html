@@ -11831,16 +11831,17 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				});
 			default:
-				return {
+				var _p10 = _p6._0;
+				return (!_elm_lang$core$Native_Utils.eq(_p10, 'registered')) ? {
 					ctor: '_Tuple2',
 					_0: A2(
 						_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
-						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p6._0),
+						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p10),
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{state: _steveherrmannwm$elm_avalon$Index$Vote})),
 					_1: _elm_lang$core$Platform_Cmd$none
-				};
+				} : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
 var _steveherrmannwm$elm_avalon$Index$Home = {ctor: 'Home'};
@@ -11982,8 +11983,8 @@ var _steveherrmannwm$elm_avalon$Index$Name = function (a) {
 	return {ctor: 'Name', _0: a};
 };
 var _steveherrmannwm$elm_avalon$Index$view = function (model) {
-	var _p10 = model.state;
-	switch (_p10.ctor) {
+	var _p11 = model.state;
+	switch (_p11.ctor) {
 		case 'Home':
 			var selectEvent = A2(
 				_elm_lang$html$Html_Events$on,
@@ -12247,8 +12248,12 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 							_elm_lang$html$Html$button,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(_steveherrmannwm$elm_avalon$Index$SubmitQuestTeam),
-								_1: {ctor: '[]'}
+								_0: _elm_lang$html$Html_Attributes$type_('button'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_steveherrmannwm$elm_avalon$Index$SubmitQuestTeam),
+									_1: {ctor: '[]'}
+								}
 							},
 							{
 								ctor: '::',

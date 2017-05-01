@@ -312,7 +312,10 @@ update msg model =
         ({model | errors = "Too many players selected on quest"}, Cmd.none)
 
     ReceiveQuestTeam response ->
-      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model , Cmd.none)
+      if response /= "registered" then
+        (checkQuestDecoder (Json.Decode.decodeString questDecoder response) {model | state = Vote} , Cmd.none)
+      else
+        (model, Cmd.none)
 -- SUBSCRIPTIONS
 
 

@@ -346,7 +346,7 @@ wss.on('connection', (ws) => {
           {
             rooms[parsed['room']]['users'][parsed['user']]['connections']['quest_members'] = ws;
             console.log("user")
-            ws.send([])
+            ws.send("registered")
           }
           else{
             rooms[parsed['room']]['quest']['players'] = parsed['players'];
