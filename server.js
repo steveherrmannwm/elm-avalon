@@ -348,8 +348,8 @@ wss.on('connection', (ws) => {
           }
           else{
             rooms[parsed['room']]['quest']['players'] = parsed['players'];
-            for(var key in rooms[code]["users"]){
-              rooms[code]["users"][key]["connections"]["quest_members"].send(parsed['players']);
+            for(var key in rooms[parsed['room']]["users"]){
+              rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(parsed['players']);
             }
           }
         });
