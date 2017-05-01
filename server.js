@@ -320,7 +320,7 @@ wss.on('connection', (ws) => {
           var clientQuest = {"name": quest["name"],
                              "required_players": quest["required_players"],
                              "flavor_text":quest["flavor_text"],
-                             "votes": {"yesVotes":{}, "noVotes": {}},
+                             "votes": {"yesVotes":[], "noVotes": []},
                              "to_fail": quest["to_fail"],
                              "times_tried": quest["times_tried"],
                              "players": quest["players"]
