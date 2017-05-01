@@ -324,7 +324,7 @@ wss.on('connection', (ws) => {
                              "times_tried": quest["times_tried"],
                              "players": quest["players"]
                    }
-
+          console.log(clientQuest)
           ws.send(JSON.stringify(clientQuest))
 
         })
