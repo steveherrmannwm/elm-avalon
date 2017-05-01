@@ -174,7 +174,7 @@ checkQuestDecoder : Result String Quest -> Model -> Model
 checkQuestDecoder decoded model=
   case decoded of
     Ok quest ->
-      {model | quest = quest, state=TeamBuild}
+      {model | quest = quest}
 
     Err err->
       {model | errors = err}
@@ -268,7 +268,7 @@ update msg model =
         (model, Cmd.none)
 
     RetrieveQuest response ->
-      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model, WebSocket.send setQuestMembers (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name)])))
+      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | state = TeamBuild}), WebSocket.send setQuestMembers (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name)])))
 
     GenerateQuest response ->
         (model, WebSocket.send retrieveQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room)])))
@@ -393,12 +393,20 @@ view model =
     Vote -> div []
       [ input [onInput Input, placeholder "Chat with others!"] []
       , button [onClick Send] [text "Send"]
+      , div [] [text (model.quest.name)]
+      , div [] [text (model.quest.flavorText)]
+      , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
+      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
       , div [] (List.map viewMessage (List.reverse model.chatMessages))
       , div [] [text (model.revealedInfo)]
       , div [] [text model.errors]
       ]
     Decide -> div []
       [ input [onInput Input, placeholder "Chat with others!"] []
+      , div [] [text (model.quest.name)]
+      , div [] [text (model.quest.flavorText)]
+      , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
+      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
       , button [onClick Send] [text "Send"]
       , div [] (List.map viewMessage (List.reverse model.chatMessages))
       , div [] [text (model.revealedInfo)]
