@@ -348,8 +348,16 @@ wss.on('connection', (ws) => {
           }
           else{
             rooms[parsed['room']]['quest']['players'] = parsed['players'];
+            var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
+                               "required_players": rooms[parsed['room']]["quest"]["required_players"],
+                               "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
+                               "votes": {"yesVotes":[], "noVotes": []},
+                               "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
+                               "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
+                               "players": rooms[parsed['room']]["quest"]["players"]
+                             }
             for(var key in rooms[parsed['room']]["users"]){
-              rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(parsed['players']);
+              rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(clientQuest);
             }
           }
         });
