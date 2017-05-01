@@ -320,21 +320,18 @@ wss.on('connection', (ws) => {
 
 
             delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
+          }
+          var clientQuest = {"name": quest["name"],
+                             "required_players": quest["required_players"],
+                             "flavor_text":quest["flavor_text"],
+                             "votes": {"yesVotes":[], "noVotes": []},
+                             "to_fail": quest["to_fail"],
+                             "times_tried": quest["times_tried"],
+                             "players": quest["players"]
+                   }
+          console.log(clientQuest)
+          ws.send(JSON.stringify(clientQuest))
 
-            var clientQuest = {"name": quest["name"],
-                               "required_players": quest["required_players"],
-                               "flavor_text":quest["flavor_text"],
-                               "votes": {"yesVotes":[], "noVotes": []},
-                               "to_fail": quest["to_fail"],
-                               "times_tried": quest["times_tried"],
-                               "players": quest["players"]
-                     }
-            console.log(clientQuest)
-            ws.send(JSON.stringify(clientQuest))
-          }
-          else {
-            ws.send("GENERATED");
-          }
         })
         break;
       case "/set_quest_members":
