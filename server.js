@@ -360,7 +360,7 @@ wss.on('connection', (ws) => {
                              }
             console.log(rooms[parsed['room']]['users'])
             for(var key in rooms[parsed['room']]["users"]){
-              rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(clientQuest);
+              rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(JSON.stringify(clientQuest));
             }
           }
         });
