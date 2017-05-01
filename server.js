@@ -325,7 +325,7 @@ wss.on('connection', (ws) => {
             rooms[parsed['room']['is_created']] = true;
           }
           while (!rooms[parsed['room']['is_created']]){
-
+            console.log("GUESS WE HERE NOW")
           }
           var clientQuest = {"name": rooms[parsed['room']['is_created']]["name"],
                              "required_players": rooms[parsed['room']['is_created']]["required_players"],
