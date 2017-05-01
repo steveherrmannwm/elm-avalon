@@ -324,6 +324,7 @@ wss.on('connection', (ws) => {
 
           }
           ws.send("OK")
+          console.log(quests)
         });
         break;
       case "/retrieve_quest":
