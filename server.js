@@ -322,7 +322,7 @@ wss.on('connection', (ws) => {
 
 
             delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
-            rooms[parsed['room']['is_created']] = true;
+            rooms[parsed['room']]['is_created'] = true;
             console.log("HERE")
           }
           ws.send("OK")
