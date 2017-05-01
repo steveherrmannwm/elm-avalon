@@ -327,13 +327,13 @@ wss.on('connection', (ws) => {
           while (!rooms[parsed['room']['is_created']]){
 
           }
-          var clientQuest = {"name": quest["name"],
-                             "required_players": quest["required_players"],
-                             "flavor_text":quest["flavor_text"],
+          var clientQuest = {"name": rooms[parsed['room']['is_created']]["name"],
+                             "required_players": rooms[parsed['room']['is_created']]["required_players"],
+                             "flavor_text":rooms[parsed['room']['is_created']]["flavor_text"],
                              "votes": {"yesVotes":[], "noVotes": []},
-                             "to_fail": quest["to_fail"],
-                             "times_tried": quest["times_tried"],
-                             "players": quest["players"]
+                             "to_fail": rooms[parsed['room']['is_created']]["to_fail"],
+                             "times_tried": rooms[parsed['room']['is_created']]["times_tried"],
+                             "players": rooms[parsed['room']['is_created']]["players"]
                    }
           console.log(clientQuest)
           ws.send(JSON.stringify(clientQuest))
