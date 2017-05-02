@@ -79,8 +79,8 @@ type GameState
   | Setup
   | TeamBuild
   | Vote
-  | Decide
   | Wait
+  | Decide
   | Final
 
 type alias Player =
@@ -181,6 +181,13 @@ checkQuestDecoder decoded model=
 
     Err err->
       {model | errors = err}
+
+checkQuestVotes : Model -> Model
+checkQuestVotes model =
+  if List.length model.quest.noVotes >= List.length model.quest.yesVotes then
+    {model | state = Vote}
+  else
+    {model | state = Decide}
 
 getListPosition: List String -> Int -> String
 getListPosition list index =
@@ -325,7 +332,10 @@ update msg model =
         (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("vote", string vote), ("user", string model.user.name) ])))
 
     ReceiveVotes response ->
-      ({model | errors = response}, Cmd.none)
+      if response == "Vote received" then
+        ({model | state = Wait}, Cmd.none)
+      else
+        (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model), Cmd.none)
 
 -- SUBSCRIPTIONS
 
@@ -397,7 +407,7 @@ view model =
       , div [] [text (model.quest.name)]
       , div [] [text (model.quest.flavorText)]
       , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
-      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
+      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " more times then the hackers win.")]
       , div [] [text (model.revealedInfo)]
       , div [] selectionBlock
       , div [] [text model.errors]
@@ -414,18 +424,7 @@ view model =
             button [type_ "button", onClick (VoteForTeam "Yes")] [text ("Yes")]
           , button [type_ "button", onClick (VoteForTeam "No")] [text ("No")]]
       ]
-      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
-      , div [] [text (model.revealedInfo)]
-      , div [] [text model.errors]
-      ]
-    Decide -> div []
-      [ input [onInput Input, placeholder "Chat with others!"] []
-      , div [] [text (model.quest.name)]
-      , div [] [text (model.quest.flavorText)]
-      , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
-      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
-      , button [onClick Send] [text "Send"]
-      , div [] (List.map viewMessage (List.reverse model.chatMessages))
+      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " more times then the hackers win.")]
       , div [] [text (model.revealedInfo)]
       , div [] [text model.errors]
       ]
@@ -433,6 +432,22 @@ view model =
       [ input [onInput Input, placeholder "Chat with others!"] []
       , button [onClick Send] [text "Send"]
       , div [] (List.map viewMessage (List.reverse model.chatMessages))
+      , div [] [text (model.quest.name)]
+      , div [] [text (model.quest.flavorText)]
+      , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
+      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " more times then the hackers win.")]
+      , div [] [text ("You've vote has been received, please hold on while other players make their decisions")]
+      , div [] [text (model.revealedInfo)]
+      , div [] [text model.errors]
+      ]
+    Decide -> div []
+      [ input [onInput Input, placeholder "Chat with others!"] []
+      , div [] [text (model.quest.name)]
+      , div [] [text (model.quest.flavorText)]
+      , button [onClick Send] [text "Send"]
+      , div [] (List.map viewMessage (List.reverse model.chatMessages))
+      , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " more times then the hackers win.")]
+      , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
       , div [] [text (model.revealedInfo)]
       , div [] [text model.errors]
       ]

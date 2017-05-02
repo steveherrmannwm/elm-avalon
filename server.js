@@ -376,6 +376,8 @@ wss.on('connection', (ws) => {
               console.log(rooms[parsed['room']]['quest'])
               if(rooms[parsed['room']]['quest']['votes']['yesVotes'].indexOf(parsed['user']) < 0 &&
                  rooms[parsed['room']]['quest']['votes']['noVotes'].indexOf(parsed['user']) < 0){
+                console.log(rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
+                console.log(Object.keys(rooms[parsed['room']]['users']).length)
                 if (parsed['vote'] == 'Yes')
                 {
                   rooms[parsed['room']]['quest']['votes']['yesVotes'].push(parsed['user'])
@@ -401,6 +403,10 @@ wss.on('connection', (ws) => {
                   rooms[parsed['room']]['quest']['votes']['noVotes'].push(parsed['user'])
                   if (rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length == Object.keys(rooms[parsed['room']]['users']))
                   {
+                    if(rooms[parsed['room']]['quest']['votes']['noVotes'].length >= rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
+                    {
+                        rooms[parsed['room']]['quest']['times_tried'] += 1;
+                    }
                     var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
                                        "required_players": rooms[parsed['room']]["quest"]["required_players"],
                                        "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
