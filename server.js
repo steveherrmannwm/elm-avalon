@@ -372,6 +372,7 @@ wss.on('connection', (ws) => {
           try{
               rooms[parsed['room']]['users'][parsed['user']]['connections']['voting'] = ws;
               // Make sure the user hasn't already voted
+              console.log(rooms[parsed['room']]['quest'])
               if(rooms[parsed['room']]['quest']['votes']['yesVotes'].indexOf(parsed['user']) < 0 &&
                  rooms[parsed['room']]['quest']['votes']['noVotes'].indexOf(parsed['user']) < 0){
                 if (parsed['vote'] == 'Yes')
