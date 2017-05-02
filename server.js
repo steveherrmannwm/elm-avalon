@@ -169,6 +169,7 @@ function generateQuest(roundNumber, maxPlayers, questTexts){
           "to_fail": quest_template["to_fail"],
           "on_success": questTexts[key]["on_success"],
           "on_fail": questTexts[key]["on_fail"],
+          "votes": {"yesVotes": [], "noVotes": []}
           "times_tried" : 0,
           "players": []
          }
