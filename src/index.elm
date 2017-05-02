@@ -52,6 +52,8 @@ retrieveQuest = wsServer++"retrieve_quest"
 receiveQuestTeam : String
 receiveQuestTeam = wsServer++"retrieve_quest_members"
 
+sendVotes : String
+sendVotes = wsServer++"receive_votes"
 -- Type definitions
 
 -- Define possible roles for players
@@ -154,6 +156,7 @@ type Msg
     | NewMessage String
     | CharInfo String
     | VoteForTeam String
+    | ReceiveVotes String
 
 
 questDecoder : Json.Decode.Decoder Quest
@@ -318,8 +321,11 @@ update msg model =
         (model, Cmd.none)
 
     VoteForTeam vote ->
-        (model, WebSocket.send vote
+        (model, WebSocket.send sendVotes
         (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("vote", string vote), ("user", string model.user.name) ])))
+
+    ReceiveVotes response ->
+      ({model | errors = response}, Cmd.none)
 
 -- SUBSCRIPTIONS
 
@@ -337,6 +343,7 @@ subscriptions model =
   , WebSocket.listen generateQuest GenerateQuest
   , WebSocket.listen retrieveQuest RetrieveQuest
   , WebSocket.listen setQuestMembers ReceiveQuestTeam
+  , WebSocket.listen sendVotes ReceiveVotes
   ]
   -- TODO: Add listeners for other
 

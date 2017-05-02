@@ -287,7 +287,7 @@ wss.on('connection', (ws) => {
               if(char_role[0] == "Merlin" || char_role[0] == "Morgana")
                 acc.push(key)
             }
-            ws.send("As the Manager, you revealed " + acc.join(", ") + " to be Merlin");
+            ws.send("As the Manager, you revealed " + acc.join(", ") + " to be the SysAdmin");
             break;
         }
         // This case is ignored by our specials above, as their both always good
@@ -362,6 +362,70 @@ wss.on('connection', (ws) => {
             for(var key in rooms[parsed['room']]["users"]){
               rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(JSON.stringify(clientQuest));
             }
+          }
+        });
+        break;
+
+      case "/receive_votes":
+        ws.on("message", function(msg){
+          var parsed = JSON.parse(msg);
+          try{
+              rooms[parsed['room']]['users'][parsed['user']]['connections']['voting'] = ws;
+              // Make sure the user hasn't already voted
+              if(rooms[parsed['room']]['quest']['votes']['yesVotes'].indexOf(parsed['user']) < 0 &&
+                 rooms[parsed['room']]['quest']['votes']['noVotes'].indexOf(parsed['user']) < 0){
+                if (parsed['vote'] == 'Yes')
+                {
+                  rooms[parsed['room']]['quest']['votes']['yesVotes'].push(parsed['user'])
+                  if (rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length == Object.keys(rooms[parsed['room']]['users']))
+                  {
+                    var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
+                                       "required_players": rooms[parsed['room']]["quest"]["required_players"],
+                                       "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
+                                       "votes": rooms[parsed['room']]['quest']['votes'],
+                                       "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
+                                       "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
+                                       "players": rooms[parsed['room']]["quest"]["players"]
+                                     };
+                    for(var key in rooms[parsed['room']]["users"]){
+                      rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(JSON.stringify(clientQuest));
+                    }
+                  }
+                  else{
+                    ws.send("Vote received");
+                  }
+                }
+                else if (parsed['vote'] == 'No'){
+                  rooms[parsed['room']]['quest']['votes']['noVotes'].push(parsed['user'])
+                  if (rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length == Object.keys(rooms[parsed['room']]['users']))
+                  {
+                    var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
+                                       "required_players": rooms[parsed['room']]["quest"]["required_players"],
+                                       "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
+                                       "votes": rooms[parsed['room']]['quest']['votes'],
+                                       "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
+                                       "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
+                                       "players": rooms[parsed['room']]["quest"]["players"]
+                                     };
+                    for(var key in rooms[parsed['room']]["users"]){
+                      rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(JSON.stringify(clientQuest));
+                    }
+                  }
+                  else {
+                    ws.send("Vote received");
+                  }
+                }
+                else{
+                  ws.send("An error occurred")
+                }
+
+            }
+            else{
+              ws.send("You've already voted")
+            }
+          }
+          catch (e){
+              ws.send("An error occurred, please restart the game");
           }
         });
         break;
