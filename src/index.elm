@@ -3,7 +3,6 @@ module Index exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Random exposing (..)
 import Json.Encode exposing (..)
 import Json.Decode exposing (map, decodeValue)
 import Html.Events.Extra exposing (targetValueIntParse)
@@ -154,6 +153,7 @@ type Msg
     | SubmitQuestTeam
     | NewMessage String
     | CharInfo String
+    | VoteForTeam String
 
 
 questDecoder : Json.Decode.Decoder Quest
@@ -316,6 +316,11 @@ update msg model =
         (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | state = Vote}), Cmd.none)
       else
         (model, Cmd.none)
+
+    VoteForTeam vote ->
+        (model, WebSocket.send vote
+        (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("vote", string vote), ("user", string model.user.name) ])))
+
 -- SUBSCRIPTIONS
 
 
@@ -398,6 +403,10 @@ view model =
       , div [] [text (model.quest.flavorText)]
       , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
       , div [] [text ("The proposed team is " ++ (appendToComma (List.head model.quest.players) (List.drop 1 model.quest.players) ""))]
+      , div [] [text ("Is this team ok to complete the task?"), fieldset [] [
+            button [type_ "button", onClick (VoteForTeam "Yes")] [text ("Yes")]
+          , button [type_ "button", onClick (VoteForTeam "No")] [text ("No")]]
+      ]
       , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " then the hackers win.")]
       , div [] [text (model.revealedInfo)]
       , div [] [text model.errors]
