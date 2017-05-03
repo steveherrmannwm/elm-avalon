@@ -530,6 +530,7 @@ wss.on('connection', (ws) => {
   }
   ws.on('close', function (code, reason)  {
     console.log('Client disconnected')
+    console.log(code);
     console.log(reason);
     var dc = null
     for(var code in rooms){
