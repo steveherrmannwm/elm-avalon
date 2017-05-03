@@ -537,6 +537,7 @@ wss.on('connection', (ws) => {
         for(var key in rooms[code]["users"]){
           console.log("READYSTATE")
           console.log(rooms[code]["users"][key]["connections"]["chat"].readyState)
+          console.log(SocketServer.OPEN)
           if(rooms[code]["users"][key]["connections"]["chat"].readyState === SocketServer.OPEN){
             rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
           }
