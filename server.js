@@ -126,7 +126,6 @@ function generateRoles(players)
 }
 
 function generateQuest(roundNumber, maxPlayers, questTexts){
-
   var templates = {5: [{"players": 2, "to_fail": 1},
                        {"players": 3, "to_fail": 1},
                        {"players": 2, "to_fail": 1},
@@ -193,7 +192,6 @@ function shuffle(a) {
 
 wss.on('connection', (ws) => {
   ws._socket.setKeepAlive(true);
-  console.log(ws.address)
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
 
@@ -530,8 +528,9 @@ wss.on('connection', (ws) => {
         }
       })
   }
-  /*ws.on('close', () => {
+  ws.on('close', (code, reason) => {
     console.log('Client disconnected')
+    console.log(reason);
     var dc = null
     for(var code in rooms){
       for(var key in rooms[code]["users"]){
@@ -558,5 +557,5 @@ wss.on('connection', (ws) => {
         }
       }
     }
-  });*/
+  });
 });
