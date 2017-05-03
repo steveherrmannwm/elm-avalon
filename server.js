@@ -545,7 +545,7 @@ wss.on('connection', (ws) => {
         }
       })
   }
-  ws.on('close', function (code, reason)  {
+  /*ws.on('close', function (code, reason)  {
     console.log('Client disconnected')
     console.log(code);
     console.log(reason);
@@ -575,5 +575,5 @@ wss.on('connection', (ws) => {
         }
       }
     }
-  });
+  });*/
 });
