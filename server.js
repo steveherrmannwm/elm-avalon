@@ -187,7 +187,6 @@ function shuffle(a) {
 }
 
 wss.on('connection', (ws) => {
-  console.log('Client connected');
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
   switch (path){
@@ -343,6 +342,7 @@ wss.on('connection', (ws) => {
       case "/set_quest_members":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
+          console.log(rooms[parsed['room']])
           if (parsed["user"])
           {
             rooms[parsed['room']]['users'][parsed['user']]['connections']['quest_members'] = ws;
