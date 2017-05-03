@@ -343,7 +343,9 @@ wss.on('connection', (ws) => {
       case "/set_quest_members":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
+          console.log("SETTING QUEST MEMBERS")
           console.log(rooms)
+          console.log(parsed)
           if (parsed["user"])
           {
             rooms[parsed['room']]['users'][parsed['user']]['connections']['quest_members'] = ws;
