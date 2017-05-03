@@ -457,7 +457,7 @@ wss.on('connection', (ws) => {
                 rooms[parsed['room']]['quest']['approval_count'] += 1;
               else if(parsed['vote'] == 'Disapprove')
                 rooms[parsed['room']]['quest']['disapproval_count'] += 1;
-
+              console.log(rooms[parsed['room']]['quest'])
               if(rooms[parsed['room']]['quest']['disapproval_count'] + rooms[parsed['room']]['quest']['approval_count'] == rooms[parsed['room']]['quest']['required_players'])
               {
                 var toReturn = {
