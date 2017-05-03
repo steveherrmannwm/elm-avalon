@@ -11,7 +11,7 @@ const INDEX = path.join(__dirname, 'index.html');
 const server = express()
   .use((req, res) => {
     res.sendFile(INDEX);
-    req.setTimeout(0);
+    req.setTimeout(60 * 1000 * 20);
   })
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
