@@ -277,6 +277,7 @@ wss.on('connection', (ws) => {
         var parsed = JSON.parse(msg)
         var role = rooms[parsed['room']]['users'][parsed['user']]['role']
 
+        console.log(role);
         // Special characters
         var acc = []
         var sent = false
@@ -317,6 +318,7 @@ wss.on('connection', (ws) => {
 
         });
         break;
+
       case "/generate_quest":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
