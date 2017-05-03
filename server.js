@@ -517,9 +517,6 @@ wss.on('connection', (ws) => {
 
         }
 
-        setInterval(function timeout(){
-            ws.ping();
-        }, 500)
     })
   }
   /*ws.on('close', function (code, reason)  {
