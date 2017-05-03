@@ -541,14 +541,14 @@ wss.on('connection', (ws) => {
           rooms[code]["users"][parsed["name"]] = {"connections": {"chat": ws}};
         }
         for(var key in rooms[code]["users"]){
-          console.log("READYSTATE")
-          console.log(rooms[code]["users"][key]["connections"]["chat"].readyState)
-          console.log(WebSocket.OPEN)
           if(rooms[code]["users"][key]["connections"]["chat"].readyState === WebSocket.OPEN){
             rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
           }
         }
-      })
+        setInterval(function timeout(){
+            ws.ping();
+        }, 500)
+    })
   }
   /*ws.on('close', function (code, reason)  {
     console.log('Client disconnected')
