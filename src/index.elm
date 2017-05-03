@@ -85,6 +85,7 @@ type GameState
   | Wait
   | Decide
   | Final
+  | Victory
 
 type alias Player =
   { name : String
@@ -103,8 +104,14 @@ type alias Quest =
   , toFail: Int
   }
 
--- MODEL
+type alias Task =
+  { text: String
+  , approveVotes: Int
+  , disapproveVotes: Int
+  , status: String
+  }
 
+-- MODEL
 
 type alias Model =
   { user : Player
@@ -120,22 +127,21 @@ type alias Model =
   , revealedInfo : String
   , quest : Quest
   , previousGroup: List String
+  , lastTaskResult: Task
   , errors : String
+  , victory: String
   }
 
 
 model : Model
 model =
-  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home 0 0 0 "" (Quest "" 2 [] [] [] "" 0 2) [] ""
-
+  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home 0 0 0 "" (Quest "" 2 [] [] [] "" 0 2) [] (Task "" 0 0 "") "" ""
 
 -- INIT
-
 
 init : (Model, Cmd Msg)
 init =
   (model, Cmd.none)
-
 
 -- UPDATE
 
@@ -179,6 +185,39 @@ questDecoder =
     (Json.Decode.at ["times_tried"] Json.Decode.int)
     (Json.Decode.at ["to_fail"] Json.Decode.int)
 
+taskDecoder : Json.Decode.Decoder Task
+taskDecoder =
+  Json.Decode.map4
+    Task
+    (Json.Decode.at ["text"] Json.Decode.string)
+    (Json.Decode.at ["approves"] Json.Decode.int)
+    (Json.Decode.at ["disapproves"] Json.Decode.int)
+    (Json.Decode.at ["status"] Json.Decode.string)
+
+checkTaskDecoder : Result String Task -> Task
+checkTaskDecoder decoded =
+  case decoded of
+    Ok task ->
+      task
+    Err err ->
+      (Task "" 0 0 "")
+
+checkVictoryConditions : Model -> Model
+checkVictoryConditions model =
+  if model.evilVictories >= 3 then
+    {model | state = Victory, victory = "The hackers have managed destroy the project. Hackers victory"}
+  else if model.quest.timesTried >= 5 then
+    {model | state = Victory, victory = "The hackers have sufficently delayed the project. Hackers Win."}
+  else
+    model
+
+
+updateModelOnTask : Model -> Model
+updateModelOnTask model =
+  if model.lastTaskResult.status == "fail" then
+    checkVictoryConditions {model | evilVictories = model.evilVictories + 1}
+  else
+    checkVictoryConditions model
 
 checkQuestDecoder : Result String Quest -> Model -> Model
 checkQuestDecoder decoded model=
@@ -191,12 +230,10 @@ checkQuestDecoder decoded model=
 
 checkQuestVotes : Model -> Model
 checkQuestVotes model =
-  if model.quest.timesTried >= 5 then
-    {model | state = Final}
-  else if List.length model.quest.noVotes >= List.length model.quest.yesVotes then
-    {model | state = TeamBuild}
+  if List.length model.quest.noVotes >= List.length model.quest.yesVotes then
+    checkVictoryConditions {model | state = TeamBuild}
   else
-    {model | state = Decide}
+    checkVictoryConditions {model | state = Decide}
 
 getListPosition: List String -> Int -> String
 getListPosition list index =
@@ -356,9 +393,9 @@ update msg model =
 
     ReceiveTask response ->
       if response == "Action received" then
-        ({model | errors = response}, Cmd.none)
-      else
         ({model | state = Wait}, Cmd.none)
+      else
+        (updateModelOnTask {model | lastTaskResult = (checkTaskDecoder (Json.Decode.decodeString taskDecoder response))}, Cmd.none)
 
 
 -- SUBSCRIPTIONS
@@ -496,6 +533,7 @@ view model =
       [ input [onInput Input, placeholder "Chat with others!"] []
       , button [onClick Send] [text "Send"]
       , div [] (List.map viewMessage (List.reverse model.chatMessages))]
+    Victory -> div [] [text (model.victory)]
 
 appendToComma : Maybe String -> List String -> String -> String
 appendToComma head tail acc =
