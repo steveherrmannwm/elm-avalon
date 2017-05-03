@@ -390,14 +390,27 @@ wss.on('connection', (ws) => {
                     rooms[parsed['room']]['quest']['votes']['noVotes'].push(parsed['user']);
                   if (rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length == Object.keys(rooms[parsed['room']]['users']).length)
                   {
-                    var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
+                    if (rooms[parsed['room']]['quest']['votes']['noVotes'].length >= rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
+                    {
+                        var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
                                        "required_players": rooms[parsed['room']]["quest"]["required_players"],
                                        "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
                                        "votes": rooms[parsed['room']]['quest']['votes'],
-                                       "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
+                                       "to_fail": rooms[parsed['room']]["quest"]["to_fail"]+1,
                                        "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
                                        "players": []
                                      };
+                    }
+                    else {
+                      var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
+                                     "required_players": rooms[parsed['room']]["quest"]["required_players"],
+                                     "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
+                                     "votes": rooms[parsed['room']]['quest']['votes'],
+                                     "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
+                                     "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
+                                     "players": rooms[parsed['room']]["quest"]["players"]
+                                   };
+                    }
 
                     for(var key in rooms[parsed['room']]["users"]){
                       rooms[parsed['room']]["users"][key]["connections"]["voting"].send(JSON.stringify(clientQuest));

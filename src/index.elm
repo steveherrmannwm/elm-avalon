@@ -123,7 +123,7 @@ type alias Model =
 
 model : Model
 model =
-  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 0 0 "" (Quest "" 2 [] [] [] "" 0 2) [] ""
+  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home 0 0 0 "" (Quest "" 2 [] [] [] "" 0 2) [] ""
 
 
 -- INIT
@@ -185,7 +185,9 @@ checkQuestDecoder decoded model=
 
 checkQuestVotes : Model -> Model
 checkQuestVotes model =
-  if List.length model.quest.noVotes >= List.length model.quest.yesVotes then
+  if model.quest.timesTried >= 5 then
+    {model | state = Final}
+  else if List.length model.quest.noVotes >= List.length model.quest.yesVotes then
     {model | state = TeamBuild}
   else
     {model | state = Decide}
@@ -285,7 +287,7 @@ update msg model =
         (model, WebSocket.send retrieveQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room)])))
 
     CharInfo response ->
-      ({model | revealedInfo = response, errors = "", leaderPosition = (model.leaderPosition + 1) % List.length (model.currentPlayers)},
+      ({model | revealedInfo = response, errors = ""},
       WebSocket.send generateQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
 
     RetrieveRole response ->
@@ -336,7 +338,7 @@ update msg model =
       if response == "Vote received" then
         ({model | state = Wait}, Cmd.none)
       else
-        (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | leaderPosition = (model.leaderPosition + 1), previousGroup = model.quest.players})), Cmd.none)
+        (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | leaderPosition = (model.leaderPosition + 1) % (model.maxPlayers), previousGroup = model.quest.players})), Cmd.none)
 
 -- SUBSCRIPTIONS
 
@@ -441,7 +443,14 @@ view model =
       , div [] [text (model.revealedInfo)]
       , div [] [text model.errors]
       ]
-    Decide -> div []
+    Decide ->
+      let
+        decisions = if List.member model.user.name model.quest.players then
+          ("ITS DECISION TIME")
+        else
+          ("Please wait while the chosen players determine the outcome of the task.")
+      in
+      div []
       [ input [onInput Input, placeholder "Chat with others!"] []
       , div [] [text (model.quest.name)]
       , div [] [text (model.quest.flavorText)]
@@ -449,6 +458,7 @@ view model =
       , div [] (List.map viewMessage (List.reverse model.chatMessages))
       , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " more times then the hackers win.")]
       , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
+      , div [] [text decisions]
       , div [] [text (model.revealedInfo)]
       , div [] [text model.errors]
       ]
