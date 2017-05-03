@@ -193,6 +193,7 @@ function shuffle(a) {
 
 wss.on('connection', (ws) => {
   ws._socket.setKeepAlive(true);
+  console.log(ws.address)
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
 
@@ -504,7 +505,6 @@ wss.on('connection', (ws) => {
             else {
               ws.send("Registered");
             }
-
           }
           catch (e)
           {
