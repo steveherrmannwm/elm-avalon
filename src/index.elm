@@ -327,8 +327,8 @@ update msg model =
       -- model.user.name ++ ": " ++ model.chatBox
 
     NewMessage str ->
-      ({model | chatMessages = (str :: model.chatMessages)}, WebSocket.send (wsServer++model.room)
-      (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("function", string "PlayerList")])))
+      ({model | chatMessages = (str :: model.chatMessages)}, Cmd.none)
+      --WebSocket.send (wsServer++model.room) (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("function", string "PlayerList")])))
 
     SubmitQuestTeam ->
       if model.quest.playersRequired == (List.length model.quest.players) then

@@ -11514,30 +11514,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 						{
 							chatMessages: {ctor: '::', _0: _p8._0, _1: model.chatMessages}
 						}),
-					_1: A2(
-						_elm_lang$websocket$WebSocket$send,
-						A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, model.room),
-						A2(
-							_elm_lang$core$Json_Encode$encode,
-							0,
-							_elm_lang$core$Json_Encode$object(
-								{
-									ctor: '::',
-									_0: {
-										ctor: '_Tuple2',
-										_0: 'name',
-										_1: _elm_lang$core$Json_Encode$string(model.user.name)
-									},
-									_1: {
-										ctor: '::',
-										_0: {
-											ctor: '_Tuple2',
-											_0: 'function',
-											_1: _elm_lang$core$Json_Encode$string('PlayerList')
-										},
-										_1: {ctor: '[]'}
-									}
-								})))
+					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'SubmitQuestTeam':
 				return _elm_lang$core$Native_Utils.eq(
