@@ -471,6 +471,9 @@ wss.on('connection', (ws) => {
                   toReturn["text"] = rooms[parsed['room']]['quest']['on_fail'];
                   toReturn["status"] = "fail";
                 }
+                for(var key in rooms[parsed['room']]["users"]){
+                  rooms[parsed['room']]["users"][key]["connections"]["approval"].send(JSON.stringify(clientQuest));
+                }
               }
               else {
                 ws.send("Action received");
