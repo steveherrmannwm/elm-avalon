@@ -528,7 +528,7 @@ wss.on('connection', (ws) => {
         }
       })
   }
-  ws.on('close', function (code, reason) => {
+  ws.on('close', function (code, reason)  {
     console.log('Client disconnected')
     console.log(reason);
     var dc = null
