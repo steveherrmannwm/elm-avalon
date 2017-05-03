@@ -195,6 +195,11 @@ wss.on('connection', (ws) => {
   ws._socket.setKeepAlive(true);
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
+
+  setTimeout(function timeout() {
+    ws.send();
+  }, 500);
+
   switch (path){
     case "/gen_room":
     ws.on('message', function(msg) {
@@ -220,20 +225,28 @@ wss.on('connection', (ws) => {
     case "/join_room":
       ws.on('message', function(msg) {
         var parsed = JSON.parse(msg)
-        if(Object.keys(rooms).indexOf(parsed["room"]) >= 0)
+        if (parsed['user'] == '')
         {
-          if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed["name"]) >= 0)
-          {
-            ws.send("Username is taken in this room")
-          }
-          else
-          {
-            ws.send('OK')
-          }
-
+          ws.send("Illegal username");
         }
-        else {
-          ws.send("Room isn't registered")
+        else{
+
+
+          if(Object.keys(rooms).indexOf(parsed["room"]) >= 0)
+          {
+            if(Object.keys(rooms[parsed["room"]]["users"]).indexOf(parsed["name"]) >= 0)
+            {
+              ws.send("Username is taken in this room")
+            }
+            else
+            {
+              ws.send('OK')
+            }
+
+          }
+          else {
+            ws.send("Room isn't registered")
+          }
         }
       });
       break;
