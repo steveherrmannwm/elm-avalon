@@ -185,7 +185,7 @@ checkQuestDecoder decoded model=
 checkQuestVotes : Model -> Model
 checkQuestVotes model =
   if List.length model.quest.noVotes >= List.length model.quest.yesVotes then
-    {model | state = Vote}
+    {model | state = TeamBuild}
   else
     {model | state = Decide}
 
@@ -335,7 +335,7 @@ update msg model =
       if response == "Vote received" then
         ({model | state = Wait}, Cmd.none)
       else
-        (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) model), Cmd.none)
+        (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | leaderPosition = model.leaderPosition + 1})), Cmd.none)
 
 -- SUBSCRIPTIONS
 

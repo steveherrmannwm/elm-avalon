@@ -262,6 +262,7 @@ wss.on('connection', (ws) => {
     case "/retrieve_role":
       ws.on("message", function(msg){
         var parsed = JSON.parse(msg)
+        console.log("Retrieving a role")
         ws.send(rooms[parsed["room"]]["users"][parsed['user']]['role'].join(","))
       });
       break;
@@ -342,11 +343,10 @@ wss.on('connection', (ws) => {
       case "/set_quest_members":
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
-          console.log("EH")
           if (parsed["user"])
           {
             rooms[parsed['room']]['users'][parsed['user']]['connections']['quest_members'] = ws;
-            console.log("user")
+            console.log("user registered")
             ws.send("registered")
           }
           else{
@@ -359,7 +359,6 @@ wss.on('connection', (ws) => {
                                "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
                                "players": rooms[parsed['room']]["quest"]["players"]
                              }
-            console.log(rooms[parsed['room']]['users'])
             for(var key in rooms[parsed['room']]["users"]){
               rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(JSON.stringify(clientQuest));
             }
@@ -373,11 +372,9 @@ wss.on('connection', (ws) => {
           try{
               rooms[parsed['room']]['users'][parsed['user']]['connections']['voting'] = ws;
               // Make sure the user hasn't already voted
-              console.log(rooms[parsed['room']]['quest'])
+              console.log(rooms[parsed['room']])
               if(rooms[parsed['room']]['quest']['votes']['yesVotes'].indexOf(parsed['user']) < 0 &&
                  rooms[parsed['room']]['quest']['votes']['noVotes'].indexOf(parsed['user']) < 0){
-                console.log(rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
-                console.log(Object.keys(rooms[parsed['room']]['users']).length)
                 if (parsed['vote'] == 'Yes')
                 {
                   rooms[parsed['room']]['quest']['votes']['yesVotes'].push(parsed['user'])
@@ -469,7 +466,6 @@ wss.on('connection', (ws) => {
     }
     if (dc != null)
     {
-      console.log(dc)
       if(Object.keys(rooms[code]["users"]).length == 0 )
       {
         delete rooms[dc[1]];
