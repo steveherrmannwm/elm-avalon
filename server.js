@@ -223,6 +223,8 @@ wss.on('connection', (ws) => {
     case "/join_room":
       ws.on('message', function(msg) {
         var parsed = JSON.parse(msg)
+        console.log(parsed)
+        console.log(parsed['user'] == '')
         if (parsed['user'] == '')
         {
           ws.send("Illegal username");
