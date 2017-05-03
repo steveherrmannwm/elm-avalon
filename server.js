@@ -396,8 +396,8 @@ wss.on('connection', (ws) => {
                                        "required_players": rooms[parsed['room']]["quest"]["required_players"],
                                        "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
                                        "votes": rooms[parsed['room']]['quest']['votes'],
-                                       "to_fail": rooms[parsed['room']]["quest"]["to_fail"]+1,
-                                       "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
+                                       "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
+                                       "times_tried": rooms[parsed['room']]["quest"]["times_tried"]+1,
                                        "players": []
                                      };
                     }
