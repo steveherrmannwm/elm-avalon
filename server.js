@@ -446,7 +446,7 @@ wss.on('connection', (ws) => {
         }
       })
   }
-  ws.on('close', () => {
+  /*ws.on('close', () => {
     console.log('Client disconnected')
     var dc = null
     for(var code in rooms){
@@ -474,5 +474,5 @@ wss.on('connection', (ws) => {
         }
       }
     }
-  });
+  });*/
 });
