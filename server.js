@@ -269,6 +269,7 @@ wss.on('connection', (ws) => {
       ws.on("message", function(msg){
         var parsed = JSON.parse(msg)
         console.log("Retrieving a role")
+        console.log(rooms[parsed['room']]['users'])
         ws.send(rooms[parsed["room"]]["users"][parsed['user']]['role'].join(","))
       });
       break;
