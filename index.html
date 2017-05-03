@@ -10780,6 +10780,7 @@ var _steveherrmannwm$elm_avalon$Index$setQuestMembers = A2(_elm_lang$core$Basics
 var _steveherrmannwm$elm_avalon$Index$generateQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'generate_quest');
 var _steveherrmannwm$elm_avalon$Index$retrieveQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'retrieve_quest');
 var _steveherrmannwm$elm_avalon$Index$receiveQuestTeam = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'retrieve_quest_members');
+var _steveherrmannwm$elm_avalon$Index$sendVotes = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'receive_votes');
 var _steveherrmannwm$elm_avalon$Index$Player = F3(
 	function (a, b, c) {
 		return {name: a, role: b, alignment: c};
@@ -10882,7 +10883,9 @@ var _steveherrmannwm$elm_avalon$Index$Model = function (a) {
 										return function (k) {
 											return function (l) {
 												return function (m) {
-													return {user: a, room: b, maxPlayers: c, currentPlayers: d, chatBox: e, chatMessages: f, state: g, leaderPosition: h, currentRound: i, evilVictories: j, revealedInfo: k, quest: l, errors: m};
+													return function (n) {
+														return {user: a, room: b, maxPlayers: c, currentPlayers: d, chatBox: e, chatMessages: f, state: g, leaderPosition: h, currentRound: i, evilVictories: j, revealedInfo: k, quest: l, previousGroup: m, errors: n};
+													};
 												};
 											};
 										};
@@ -10977,10 +10980,19 @@ var _steveherrmannwm$elm_avalon$Index$parseRoleResponse = F2(
 			player);
 	});
 var _steveherrmannwm$elm_avalon$Index$Final = {ctor: 'Final'};
-var _steveherrmannwm$elm_avalon$Index$Wait = {ctor: 'Wait'};
 var _steveherrmannwm$elm_avalon$Index$Decide = {ctor: 'Decide'};
+var _steveherrmannwm$elm_avalon$Index$Wait = {ctor: 'Wait'};
 var _steveherrmannwm$elm_avalon$Index$Vote = {ctor: 'Vote'};
 var _steveherrmannwm$elm_avalon$Index$TeamBuild = {ctor: 'TeamBuild'};
+var _steveherrmannwm$elm_avalon$Index$checkQuestVotes = function (model) {
+	return (_elm_lang$core$Native_Utils.cmp(
+		_elm_lang$core$List$length(model.quest.noVotes),
+		_elm_lang$core$List$length(model.quest.yesVotes)) > -1) ? _elm_lang$core$Native_Utils.update(
+		model,
+		{state: _steveherrmannwm$elm_avalon$Index$TeamBuild}) : _elm_lang$core$Native_Utils.update(
+		model,
+		{state: _steveherrmannwm$elm_avalon$Index$Decide});
+};
 var _steveherrmannwm$elm_avalon$Index$Setup = {ctor: 'Setup'};
 var _steveherrmannwm$elm_avalon$Index$update = F2(
 	function (msg, model) {
@@ -11487,14 +11499,13 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 							{state: _steveherrmannwm$elm_avalon$Index$Vote})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				} : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			default:
-				var _p12 = _p7._0;
+			case 'VoteForTeam':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
 					_1: A2(
 						_elm_lang$websocket$WebSocket$send,
-						_p12,
+						_steveherrmannwm$elm_avalon$Index$sendVotes,
 						A2(
 							_elm_lang$core$Json_Encode$encode,
 							0,
@@ -11511,7 +11522,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 										_0: {
 											ctor: '_Tuple2',
 											_0: 'vote',
-											_1: _elm_lang$core$Json_Encode$string(_p12)
+											_1: _elm_lang$core$Json_Encode$string(_p7._0)
 										},
 										_1: {
 											ctor: '::',
@@ -11524,6 +11535,25 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 										}
 									}
 								})))
+				};
+			default:
+				var _p12 = _p7._0;
+				return _elm_lang$core$Native_Utils.eq(_p12, 'Vote received') ? {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: _steveherrmannwm$elm_avalon$Index$Wait}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				} : {
+					ctor: '_Tuple2',
+					_0: _steveherrmannwm$elm_avalon$Index$checkQuestVotes(
+						A2(
+							_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
+							A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p12),
+							_elm_lang$core$Native_Utils.update(
+								model,
+								{leaderPosition: model.leaderPosition + 1, previousGroup: model.quest.players}))),
+					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
@@ -11541,8 +11571,12 @@ var _steveherrmannwm$elm_avalon$Index$model = _steveherrmannwm$elm_avalon$Index$
 		{ctor: '[]'},
 		'',
 		0,
-		2))('');
+		2))(
+	{ctor: '[]'})('');
 var _steveherrmannwm$elm_avalon$Index$init = {ctor: '_Tuple2', _0: _steveherrmannwm$elm_avalon$Index$model, _1: _elm_lang$core$Platform_Cmd$none};
+var _steveherrmannwm$elm_avalon$Index$ReceiveVotes = function (a) {
+	return {ctor: 'ReceiveVotes', _0: a};
+};
 var _steveherrmannwm$elm_avalon$Index$VoteForTeam = function (a) {
 	return {ctor: 'VoteForTeam', _0: a};
 };
@@ -11650,7 +11684,11 @@ var _steveherrmannwm$elm_avalon$Index$subscriptions = function (model) {
 											_1: {
 												ctor: '::',
 												_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$setQuestMembers, _steveherrmannwm$elm_avalon$Index$ReceiveQuestTeam),
-												_1: {ctor: '[]'}
+												_1: {
+													ctor: '::',
+													_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$sendVotes, _steveherrmannwm$elm_avalon$Index$ReceiveVotes),
+													_1: {ctor: '[]'}
+												}
 											}
 										}
 									}
@@ -12065,7 +12103,7 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 																	A2(
 																		_elm_lang$core$Basics_ops['++'],
 																		_elm_lang$core$Basics$toString(5 - model.quest.timesTried),
-																		' then the hackers win.'))))),
+																		' more times then the hackers win.'))))),
 													_1: {ctor: '[]'}
 												}),
 											_1: {
@@ -12278,7 +12316,7 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 																			A2(
 																				_elm_lang$core$Basics_ops['++'],
 																				_elm_lang$core$Basics$toString(5 - model.quest.timesTried),
-																				' then the hackers win.'))))),
+																				' more times then the hackers win.'))))),
 															_1: {ctor: '[]'}
 														}),
 													_1: {
@@ -12304,137 +12342,6 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 															_1: {ctor: '[]'}
 														}
 													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				});
-		case 'Decide':
-			return A2(
-				_elm_lang$html$Html$div,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$input,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onInput(_steveherrmannwm$elm_avalon$Index$Input),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$placeholder('Chat with others!'),
-								_1: {ctor: '[]'}
-							}
-						},
-						{ctor: '[]'}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$div,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text(model.quest.name),
-								_1: {ctor: '[]'}
-							}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$div,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text(model.quest.flavorText),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$div,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text(
-											A2(
-												_elm_lang$core$Basics_ops['++'],
-												'It takes ',
-												A2(
-													_elm_lang$core$Basics_ops['++'],
-													_elm_lang$core$Basics$toString(model.quest.toFail),
-													' failures to fail this task.'))),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text(
-												A2(
-													_elm_lang$core$Basics_ops['++'],
-													'You\'ve tried to complete this quest ',
-													A2(
-														_elm_lang$core$Basics_ops['++'],
-														_elm_lang$core$Basics$toString(model.quest.timesTried),
-														A2(
-															_elm_lang$core$Basics_ops['++'],
-															' times. If you fail to assign a team ',
-															A2(
-																_elm_lang$core$Basics_ops['++'],
-																_elm_lang$core$Basics$toString(5 - model.quest.timesTried),
-																' then the hackers win.'))))),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$button,
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html_Events$onClick(_steveherrmannwm$elm_avalon$Index$Send),
-												_1: {ctor: '[]'}
-											},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text('Send'),
-												_1: {ctor: '[]'}
-											}),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$div,
-												{ctor: '[]'},
-												A2(
-													_elm_lang$core$List$map,
-													_steveherrmannwm$elm_avalon$Index$viewMessage,
-													_elm_lang$core$List$reverse(model.chatMessages))),
-											_1: {
-												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$div,
-													{ctor: '[]'},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text(model.revealedInfo),
-														_1: {ctor: '[]'}
-													}),
-												_1: {
-													ctor: '::',
-													_0: A2(
-														_elm_lang$html$Html$div,
-														{ctor: '[]'},
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html$text(model.errors),
-															_1: {ctor: '[]'}
-														}),
-													_1: {ctor: '[]'}
 												}
 											}
 										}
@@ -12492,7 +12399,7 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 									{ctor: '[]'},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text(model.revealedInfo),
+										_0: _elm_lang$html$Html$text(model.quest.name),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -12502,10 +12409,216 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 										{ctor: '[]'},
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text(model.errors),
+											_0: _elm_lang$html$Html$text(model.quest.flavorText),
 											_1: {ctor: '[]'}
 										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$div,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text(
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														'It takes ',
+														A2(
+															_elm_lang$core$Basics_ops['++'],
+															_elm_lang$core$Basics$toString(model.quest.toFail),
+															' failures to fail this task.'))),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$div,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text(
+														A2(
+															_elm_lang$core$Basics_ops['++'],
+															'You\'ve tried to complete this quest ',
+															A2(
+																_elm_lang$core$Basics_ops['++'],
+																_elm_lang$core$Basics$toString(model.quest.timesTried),
+																A2(
+																	_elm_lang$core$Basics_ops['++'],
+																	' times. If you fail to assign a team ',
+																	A2(
+																		_elm_lang$core$Basics_ops['++'],
+																		_elm_lang$core$Basics$toString(5 - model.quest.timesTried),
+																		' more times then the hackers win.'))))),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$div,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('You\'ve vote has been received, please hold on while other players make their decisions'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$div,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text(model.revealedInfo),
+															_1: {ctor: '[]'}
+														}),
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$div,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text(model.errors),
+																_1: {ctor: '[]'}
+															}),
+														_1: {ctor: '[]'}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				});
+		case 'Decide':
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$input,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onInput(_steveherrmannwm$elm_avalon$Index$Input),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$placeholder('Chat with others!'),
+								_1: {ctor: '[]'}
+							}
+						},
+						{ctor: '[]'}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(model.quest.name),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(model.quest.flavorText),
 									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$button,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(_steveherrmannwm$elm_avalon$Index$Send),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Send'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{ctor: '[]'},
+										A2(
+											_elm_lang$core$List$map,
+											_steveherrmannwm$elm_avalon$Index$viewMessage,
+											_elm_lang$core$List$reverse(model.chatMessages))),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$div,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text(
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														'You\'ve tried to complete this quest ',
+														A2(
+															_elm_lang$core$Basics_ops['++'],
+															_elm_lang$core$Basics$toString(model.quest.timesTried),
+															A2(
+																_elm_lang$core$Basics_ops['++'],
+																' times. If you fail to assign a team ',
+																A2(
+																	_elm_lang$core$Basics_ops['++'],
+																	_elm_lang$core$Basics$toString(5 - model.quest.timesTried),
+																	' more times then the hackers win.'))))),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$div,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text(
+														A2(
+															_elm_lang$core$Basics_ops['++'],
+															'It takes ',
+															A2(
+																_elm_lang$core$Basics_ops['++'],
+																_elm_lang$core$Basics$toString(model.quest.toFail),
+																' failures to fail this task.'))),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$div,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text(model.revealedInfo),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$div,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text(model.errors),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}
+											}
+										}
+									}
 								}
 							}
 						}

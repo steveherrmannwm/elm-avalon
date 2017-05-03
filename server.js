@@ -387,7 +387,7 @@ wss.on('connection', (ws) => {
                                        "votes": rooms[parsed['room']]['quest']['votes'],
                                        "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
                                        "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
-                                       "players": rooms[parsed['room']]["quest"]["players"]
+                                       "players": []
                                      };
                     for(var key in rooms[parsed['room']]["users"]){
                       rooms[parsed['room']]["users"][key]["connections"]["voting"].send(JSON.stringify(clientQuest));
@@ -411,7 +411,7 @@ wss.on('connection', (ws) => {
                                        "votes": rooms[parsed['room']]['quest']['votes'],
                                        "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
                                        "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
-                                       "players": rooms[parsed['room']]["quest"]["players"]
+                                       "players": []
                                      };
                     for(var key in rooms[parsed['room']]["users"]){
                       rooms[parsed['room']]["users"][key]["connections"]["voting"].send(JSON.stringify(clientQuest));

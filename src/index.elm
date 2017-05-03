@@ -116,13 +116,14 @@ type alias Model =
   , evilVictories : Int
   , revealedInfo : String
   , quest : Quest
+  , previousGroup: List String
   , errors : String
   }
 
 
 model : Model
 model =
-  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 0 0 "" (Quest "" 2 [] [] [] "" 0 2) ""
+  Model (Player "" Unassigned Unaligned) "" 5 [] "" [] Home -1 0 0 "" (Quest "" 2 [] [] [] "" 0 2) [] ""
 
 
 -- INIT
@@ -335,7 +336,7 @@ update msg model =
       if response == "Vote received" then
         ({model | state = Wait}, Cmd.none)
       else
-        (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | leaderPosition = model.leaderPosition + 1})), Cmd.none)
+        (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | leaderPosition = (model.leaderPosition + 1), previousGroup = model.quest.players})), Cmd.none)
 
 -- SUBSCRIPTIONS
 
