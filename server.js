@@ -202,6 +202,8 @@ wss.on('connection', (ws) => {
       while(code == "" || Object.keys(rooms).indexOf(code) > 1){
         code = randomString(5, '23456789abcdefghijkmnpqrstuvwxyzABCDEFGHIJKMNPQRSTUVWXYZ') // Took out 0,1,o,l
       }
+      console.log("CODE GENERATED")
+      console.log(code);
       ws.send(code)
       rooms[code] = {"users": {},
                      "roles": false,
