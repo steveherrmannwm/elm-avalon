@@ -528,6 +528,8 @@ wss.on('connection', (ws) => {
     var code = path.split("/")[1] // Retrieve the room code
     ws.on('message', function(msg){
         var parsed = JSON.parse(msg)
+        console.log(parsed);
+        console.log("We found a msg");
         if(findObject(ws, rooms[code]) < 0)
         {
           rooms[code]["users"][parsed["name"]] = {"connections": {"chat": ws}};
