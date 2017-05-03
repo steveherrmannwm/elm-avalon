@@ -277,7 +277,7 @@ wss.on('connection', (ws) => {
         var parsed = JSON.parse(msg)
         var role = rooms[parsed['room']]['users'][parsed['user']]['role']
 
-        console.log(role);
+        console.log(rooms[parsed['room']])
         // Special characters
         var acc = []
         var sent = false
