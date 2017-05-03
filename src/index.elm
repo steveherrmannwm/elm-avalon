@@ -23,41 +23,12 @@ wsServer =
   "wss://elm-avalon.herokuapp.com/"
 
 roomGen : String
-roomGen = wsServer++"gen_room"
+roomGen =
+    wsServer++"gen_room"
 
 joinRoom : String
-joinRoom = wsServer++"join_room"
-
-playerList : String
-playerList = wsServer++"player_list"
-
-createRoles : String
-createRoles = wsServer++"create_roles"
-
-retrieveRole : String
-retrieveRole = wsServer++"retrieve_role"
-
-charInfo : String
-charInfo = wsServer++"char_info"
-
-setQuestMembers : String
-setQuestMembers = wsServer++"set_quest_members"
-
-generateQuest : String
-generateQuest = wsServer++"generate_quest"
-
-retrieveQuest : String
-retrieveQuest = wsServer++"retrieve_quest"
-
-receiveQuestTeam : String
-receiveQuestTeam = wsServer++"retrieve_quest_members"
-
-sendVotes : String
-sendVotes = wsServer++"receive_votes"
-
-taskApproval : String
-taskApproval = wsServer++"task_approval"
--- Type definitions
+joinRoom =
+    wsServer++"join_room"
 
 -- Define possible roles for players
 -- TODO: Come up with original names for these roles
@@ -301,7 +272,7 @@ update msg model =
     JoinRoom response ->
       if response == "OK" then
         ({ model | state = Setup, errors = ""}, WebSocket.send (wsServer ++ model.room)
-          (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("msg", string "has connected")])))
+          (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("function", string "chat"), ("msg", string (model.user.name ++ "has connected"))])))
       else
         ({model | errors = response}, Cmd.none)
 
@@ -315,28 +286,28 @@ update msg model =
       (model, WebSocket.send roomGen "")
 
     PlayerList list ->
-      ({model | currentPlayers = String.split "," list}, WebSocket.send createRoles
-      (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
+      ({model | currentPlayers = String.split "," list}, WebSocket.send (wsServer++model.room)
+      (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("maxPlayers", Json.Encode.int model.maxPlayers), ("function", string "CreateRoles")])))
 
     CreateRoles response ->
       if response /= "NEP" then -- No Enough players
-        (model, WebSocket.send retrieveRole (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name)])))
+        (model, WebSocket.send (wsServer++model.room) (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name), ("function", string "RetrieveRole")])))
       else
         (model, Cmd.none)
 
     RetrieveQuest response ->
-      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | state = TeamBuild}), WebSocket.send setQuestMembers (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name)])))
+      (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | state = TeamBuild}), WebSocket.send (wsServer++model.room) (Json.Encode.encode 0 (Json.Encode.object [("user", string model.user.name), ("function", string "setQuestMember")])))
 
     GenerateQuest response ->
-        (model, WebSocket.send retrieveQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room)])))
+        (model, WebSocket.send (wsServer++model.room) (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("function", string "retrieveQuest")])))
 
     CharInfo response ->
       ({model | revealedInfo = response, errors = ""},
-      WebSocket.send generateQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
+      WebSocket.send (wsServer++model.room) (Json.Encode.encode 0 (Json.Encode.object [("roundNumber", (Json.Encode.int model.currentRound)), ("maxPlayers", Json.Encode.int model.maxPlayers), ("function", string "GenerateQuest")])))
 
     RetrieveRole response ->
       ({model | user = parseRoleResponse response model.user},
-      WebSocket.send charInfo (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name)])))
+      WebSocket.send (wsServer++model.room) (Json.Encode.encode 0 (Json.Encode.object [("user", string model.user.name), ("function", string "CharInfo")])))
 
     SetMaxPlayers players ->
       ({ model | maxPlayers = players}, Cmd.none)
@@ -356,13 +327,13 @@ update msg model =
       -- model.user.name ++ ": " ++ model.chatBox
 
     NewMessage str ->
-      ({model | chatMessages = (str :: model.chatMessages)}, WebSocket.send playerList
-      (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("room", string model.room)])))
+      ({model | chatMessages = (str :: model.chatMessages)}, WebSocket.send (wsServer++model.room)
+      (Json.Encode.encode 0 (Json.Encode.object [("name", string model.user.name), ("function", string "PlayerList")])))
 
     SubmitQuestTeam ->
       if model.quest.playersRequired == (List.length model.quest.players) then
-        ({model | errors = ""}, WebSocket.send setQuestMembers
-        (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("players", Json.Encode.list (List.map string model.quest.players))])))
+        ({model | errors = ""}, WebSocket.send (wsServer++model.room)
+        (Json.Encode.encode 0 (Json.Encode.object [("function", string "SetQuestMembers"), ("players", Json.Encode.list (List.map string model.quest.players))])))
       else if model.quest.playersRequired > (List.length model.quest.players) then
         ({model | errors = "Need more players on this quest"}, Cmd.none)
       else
@@ -375,28 +346,28 @@ update msg model =
         (model, Cmd.none)
 
     VoteForTeam vote ->
-        (model, WebSocket.send sendVotes
-        (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("vote", string vote), ("user", string model.user.name) ])))
+        (model, WebSocket.send (wsServer++model.room)
+        (Json.Encode.encode 0 (Json.Encode.object [("function", string "SendVotes"), ("vote", string vote), ("user", string model.user.name) ])))
 
     ReceiveVotes response ->
       if response == "Vote received" then
-        ({model | state = Wait}, WebSocket.send taskApproval (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name)])))
+        ({model | state = Wait}, WebSocket.send (wsServer++model.room) (Json.Encode.encode 0 (Json.Encode.object [("function", string "TaskApproval"), ("user", string model.user.name)])))
       else
         (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | leaderPosition = (model.leaderPosition + 1) % (model.maxPlayers), previousGroup = model.quest.players})), Cmd.none)
 
     ApproveTask ->
-      (model, WebSocket.send taskApproval
-      (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name), ("vote", string "Approve")])))
+      (model, WebSocket.send (wsServer++model.room)
+      (Json.Encode.encode 0 (Json.Encode.object [("function", string "ApproveTask"), ("user", string model.user.name), ("vote", string "Approve")])))
 
     SabotageTask ->
-      (model, WebSocket.send taskApproval
-      (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name), ("vote", string "Disapprove")])))
+      (model, WebSocket.send (wsServer++model.room)
+      (Json.Encode.encode 0 (Json.Encode.object [("function", string "ApproveTask"), ("user", string model.user.name), ("vote", string "Disapprove")])))
 
     ReceiveTask response ->
       if response == "Action received" then
         ({model | state = Wait}, Cmd.none)
       else
-        (updateModelOnTask {model | lastTaskResult = (checkTaskDecoder (Json.Decode.decodeString taskDecoder response)), state = TeamBuild, currentRound = model.currentRound + 1}, WebSocket.send generateQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
+        (updateModelOnTask {model | lastTaskResult = (checkTaskDecoder (Json.Decode.decodeString taskDecoder response)), state = TeamBuild, currentRound = model.currentRound + 1}, WebSocket.send (wsServer++model.room) (Json.Encode.encode 0 (Json.Encode.object [("function", string "GenerateQuest"), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
 
     SetAssassinateTarget target ->
       (model, Cmd.none)
@@ -410,15 +381,6 @@ subscriptions model =
   [ WebSocket.listen (wsServer ++ model.room) NewMessage
   , WebSocket.listen roomGen GenRoom
   , WebSocket.listen joinRoom JoinRoom
-  , WebSocket.listen playerList PlayerList
-  , WebSocket.listen createRoles CreateRoles
-  , WebSocket.listen retrieveRole RetrieveRole
-  , WebSocket.listen charInfo CharInfo
-  , WebSocket.listen generateQuest GenerateQuest
-  , WebSocket.listen retrieveQuest RetrieveQuest
-  , WebSocket.listen setQuestMembers ReceiveQuestTeam
-  , WebSocket.listen sendVotes ReceiveVotes
-  , WebSocket.listen taskApproval ReceiveTask
   ]
   -- TODO: Add listeners for other
 

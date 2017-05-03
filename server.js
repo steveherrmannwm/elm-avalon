@@ -17,6 +17,7 @@ const server = express()
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 const wss = new SocketServer({ server });
+console.log(wss);
 
 var rooms = {};
 var current_rooms = [];
@@ -194,7 +195,7 @@ function shuffle(a) {
 wss.on('connection', (ws) => {
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
-
+    console.log("WS CONNECTED")
   switch (path){
     case "/gen_room":
     ws.on('message', function(msg) {
@@ -249,284 +250,6 @@ wss.on('connection', (ws) => {
         }
       });
       break;
-
-    case "/player_list":
-      ws.on("message", function(msg){
-        var parsed = JSON.parse(msg)
-          ws.send(Object.keys(rooms[parsed["room"]]["users"]).join(","))
-          setInterval(function timeout (){
-            ws.ping();
-          }, 500)
-      });
-      break;
-
-    case "/create_roles":
-      ws.on("message", function(msg){
-      var parsed = JSON.parse(msg)
-      if (parsed["maxPlayers"] - Object.keys(rooms[parsed['room']]['users']).length == 0)
-      {
-        if(!rooms[parsed['room']]['roles']){
-          var roles = shuffle(generateRoles(parsed['maxPlayers']))
-          console.log("Creating roles")
-          var index = 0;
-          for(var key in rooms[parsed['room']]["users"]){
-            rooms[parsed['room']]['users'][key]['role'] = roles[index];
-            index++;
-          }
-          rooms[parsed['room']]['roles'] = true;
-        }
-          ws.send("OK")
-        }
-        else {
-          ws.send("NEP")
-        }
-        
-      });
-      break;
-    case "/retrieve_role":
-      ws.on("message", function(msg){
-        var parsed = JSON.parse(msg)
-        console.log("Retrieving a role")
-        console.log(rooms[parsed['room']]['users'])
-        ws.send(rooms[parsed["room"]]["users"][parsed['user']]['role'].join(","))
-      });
-      break;
-    case '/char_info':
-      ws.on("message", function(msg){
-        var parsed = JSON.parse(msg)
-        var role = rooms[parsed['room']]['users'][parsed['user']]['role']
-
-        console.log(rooms[parsed['room']])
-        // Special characters
-        var acc = []
-        var sent = false
-        switch(role[0]){
-          case "Merlin":
-            for(var key in rooms[parsed['room']]["users"]){
-              var char_role = rooms[parsed['room']]['users'][key]['role'];
-              if(char_role[1] != "Good" && char_role[0] != "Mordred")
-                acc.push(key)
-            }
-            ws.send("As the SysAdmin, you revealed " + acc.join(", ") + " to be evil");
-            break;
-          case "Percival":
-            for(var key in rooms[parsed['room']]["users"]){
-              var char_role = rooms[parsed['room']]['users'][key]['role'];
-              if(char_role[0] == "Merlin" || char_role[0] == "Morgana")
-                acc.push(key)
-            }
-            ws.send("As the Manager, you revealed " + acc.join(", ") + " to be the SysAdmin");
-            break;
-        }
-        // This case is ignored by our specials above, as their both always good
-        // so we can still use acc safely
-        if(role[1] != "Good" && role[0] != "Oberon")
-        {
-          for(var key in rooms[parsed['room']]["users"]){
-            var char_role = rooms[parsed['room']]['users'][key]['role'];
-            if(char_role[1] != 'Good' && char_role['0'] != "Oberon")
-              acc.push(key)
-          }
-          ws.send("As a hacker, you know your fellow hackers are " + acc.join(', '))
-        }
-        else if(role[0] == "Member"){
-          ws.send("As a programmer, you have no one revealed! Pay close attention to the conversation to try and get info")
-        }
-        else if (role[0] == "Oberon")
-          ws.send("As the lone wolf, you don't know who the other hackers are! Pay close attention to the conversation to try and get info")
-
-        });
-        break;
-
-      case "/generate_quest":
-        ws.on("message", function(msg){
-          var parsed = JSON.parse(msg);
-          console.log("GENERATING A QUEST")
-          if(!rooms[parsed['room']]['create_quest']){
-            rooms[parsed['room']]['create_quest'] = true;
-            if(Object.keys(rooms[parsed['room']]['available_quests']).length == 0){
-              var quest = {"name": "", "required_players": 2, "flavor_text":"",
-                      "to_fail": 1, "on_success":"", "on_fail":"", "times_tried": 0,
-                      "players": [], "votes" : {"yesVotes": [], "noVotes": []}, "approval_count": 0,
-                      "disapproval_count": 0}
-            }
-            else{
-              var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
-            }
-            rooms[parsed['room']]['quest'] = quest
-
-            delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
-          }
-          ws.send("OK")
-        });
-        break;
-
-      case "/retrieve_quest":
-        ws.on("message", function(msg){
-          var parsed = JSON.parse(msg);
-          var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
-                             "required_players": rooms[parsed['room']]["quest"]["required_players"],
-                             "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
-                             "votes": {"yesVotes":[], "noVotes": []},
-                             "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
-                             "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
-                             "players": rooms[parsed['room']]["quest"]["players"]
-                           }
-          ws.send(JSON.stringify(clientQuest))
-        });
-        break;
-
-      case "/set_quest_members":
-        ws.on("message", function(msg){
-          var parsed = JSON.parse(msg);
-          console.log("SETTING QUEST MEMBERS")
-          console.log("THIS IS THE ROOMS:")
-          console.log(rooms)
-          console.log(parsed)
-          if (parsed["user"])
-          {
-            rooms[parsed['room']]['users'][parsed['user']]['connections']['quest_members'] = ws;
-            console.log("user registered")
-            ws.send("registered")
-          }
-          else{
-            rooms[parsed['room']]['quest']['players'] = parsed['players'];
-            var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
-                               "required_players": rooms[parsed['room']]["quest"]["required_players"],
-                               "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
-                               "votes": {"yesVotes":[], "noVotes": []},
-                               "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
-                               "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
-                               "players": rooms[parsed['room']]["quest"]["players"]
-                             }
-            for(var key in rooms[parsed['room']]["users"]){
-              if(rooms[parsed['room']]["users"][key]["connections"]["quest_members"].readyState == WebSocket.OPEN){
-                rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(JSON.stringify(clientQuest));
-              }
-            }
-          }
-        });
-        break;
-
-      case "/receive_votes":
-        ws.on("message", function(msg){
-          var parsed = JSON.parse(msg);
-          try{
-              rooms[parsed['room']]['users'][parsed['user']]['connections']['voting'] = ws;
-              // Make sure the user hasn't already voted
-              console.log(rooms[parsed['room']])
-              if(rooms[parsed['room']]['quest']['votes']['yesVotes'].indexOf(parsed['user']) < 0 &&
-                 rooms[parsed['room']]['quest']['votes']['noVotes'].indexOf(parsed['user']) < 0){
-                if (parsed['vote'] == 'Yes' || parsed['vote'] == 'No')
-                {
-                  if (parsed['vote'] == 'Yes')
-                    rooms[parsed['room']]['quest']['votes']['yesVotes'].push(parsed['user']);
-                  else
-                    rooms[parsed['room']]['quest']['votes']['noVotes'].push(parsed['user']);
-                  if (rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length == Object.keys(rooms[parsed['room']]['users']).length)
-                  {
-                    if (rooms[parsed['room']]['quest']['votes']['noVotes'].length >= rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
-                    {
-                        var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
-                                       "required_players": rooms[parsed['room']]["quest"]["required_players"],
-                                       "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
-                                       "votes": rooms[parsed['room']]['quest']['votes'],
-                                       "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
-                                       "times_tried": rooms[parsed['room']]["quest"]["times_tried"]+1,
-                                       "players": []
-                                     };
-                    }
-                    else {
-                      var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
-                                     "required_players": rooms[parsed['room']]["quest"]["required_players"],
-                                     "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
-                                     "votes": rooms[parsed['room']]['quest']['votes'],
-                                     "to_fail": rooms[parsed['room']]["quest"]["to_fail"],
-                                     "times_tried": rooms[parsed['room']]["quest"]["times_tried"],
-                                     "players": rooms[parsed['room']]["quest"]["players"]
-                                   };
-                    }
-
-                    for(var key in rooms[parsed['room']]["users"]){
-                      if(rooms[parsed['room']]["users"][key]["connections"]["voting"].readyState === WebSocket.OPEN){
-                        rooms[parsed['room']]["users"][key]["connections"]["voting"].send(JSON.stringify(clientQuest));
-                      }
-                    }
-                    rooms[parsed['room']]['create_quest'] = false
-                    if(rooms[parsed['room']]['quest']['votes']['noVotes'].length >= rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
-                    {
-                        rooms[parsed['room']]['quest']['times_tried'] += 1;
-                        rooms[parsed['room']]['quest']['votes']['noVotes'] = []
-                        rooms[parsed['room']]['quest']['votes']['yesVotes'] = []
-
-                    }
-                  }
-                  else {
-                    ws.send("Vote received");
-                  }
-                }
-                else{
-                  ws.send("An error occurred")
-                }
-
-            }
-            else{
-              ws.send("You've already voted")
-            }
-          }
-          catch (e){
-              ws.send("An error occurred, please restart the game");
-              console.log(e)
-          }
-        });
-        break;
-      case "/task_approval":
-        ws.on("message", function(msg){
-          try{
-            var parsed = JSON.parse(msg);
-            rooms[parsed['room']]['users'][parsed['user']]['connections']['approval'] = ws
-            if(parsed['vote'])
-            {
-              if(parsed['vote'] == 'Approve')
-                rooms[parsed['room']]['quest']['approval_count'] += 1;
-              else if(parsed['vote'] == 'Disapprove')
-                rooms[parsed['room']]['quest']['disapproval_count'] += 1;
-              console.log(rooms[parsed['room']]['quest'])
-              if(rooms[parsed['room']]['quest']['disapproval_count'] + rooms[parsed['room']]['quest']['approval_count'] == rooms[parsed['room']]['quest']['required_players'])
-              {
-                var toReturn = {
-                                "text":rooms[parsed['room']]['quest']['on_success'],
-                                "approves": rooms[parsed['room']]['quest']['approval_count'],
-                                "disapproves": rooms[parsed['room']]['quest']['disapproval_count'],
-                                "status": "success"
-                               }
-                if(rooms[parsed['room']]['quest']['disapproval_count'] >= rooms[parsed['room']]['quest']['to_fail'])
-                {
-                  toReturn["text"] = rooms[parsed['room']]['quest']['on_fail'];
-                  toReturn["status"] = "fail";
-                }
-                for(var key in rooms[parsed['room']]["users"]){
-                  if(rooms[parsed['room']]["users"][key]["connections"]["approval"].readyState === WebSocket.OPEN){
-                    rooms[parsed['room']]["users"][key]["connections"]["approval"].send(JSON.stringify(toReturn));
-                  }
-                }
-              }
-              else {
-                ws.send("Action received");
-              }
-            }
-            else {
-              ws.send("Registered");
-            }
-          }
-          catch (e)
-          {
-            console.log(e)
-            ws.send("An error occurred, please restart the game");
-          }
-        })
-        break;
-
   }
 
   if(current_rooms.indexOf(path) >= 0){
@@ -534,17 +257,266 @@ wss.on('connection', (ws) => {
     var code = path.split("/")[1] // Retrieve the room code
     ws.on('message', function(msg){
         var parsed = JSON.parse(msg)
-        console.log(parsed);
-        console.log("We found a msg");
-        if(findObject(ws, rooms[code]) < 0)
-        {
-          rooms[code]["users"][parsed["name"]] = {"connections": {"chat": ws}};
+
+
+        switch (parsed['function']){
+            case "PlayerList":
+            var json = {"players": Object.keys(rooms[code]["users"])}
+            ws.send(JSON.stringify(json))
+            break;
+
+            case "CreateRoles":
+            if (parsed["maxPlayers"] - Object.keys(rooms[code]['users']).length == 0)
+            {
+                if(!rooms[code]['roles']){
+                  var roles = shuffle(generateRoles(parsed['maxPlayers']))
+                  console.log("Creating roles")
+                  var index = 0;
+                  for(var key in rooms[code]["users"]){
+                    rooms[code]['users'][key]['role'] = roles[index];
+                    index++;
+                  }
+                rooms[code]['roles'] = true;
+                }
+              ws.send("OK")
+            }
+            else {
+              ws.send("NEP")
+            }
+            break;
+
+            case "RetrieveRole":
+                console.log("Retrieving a role")
+                console.log(rooms[code]['users'])
+                ws.send(rooms[code]["users"][parsed['user']]['role'].join(","))
+                break;
+            case 'CharInfo':
+            var role = rooms[code]['users'][parsed['user']]['role']
+
+            console.log(rooms[code])
+            // Special characters
+            var acc = []
+            var sent = false
+            switch(role[0]){
+              case "Merlin":
+                for(var key in rooms[code]["users"]){
+                  var char_role = rooms[code]['users'][key]['role'];
+                  if(char_role[1] != "Good" && char_role[0] != "Mordred")
+                    acc.push(key)
+                }
+                ws.send("As the SysAdmin, you revealed " + acc.join(", ") + " to be evil");
+                break;
+              case "Percival":
+                for(var key in rooms[code]["users"]){
+                  var char_role = rooms[code]['users'][key]['role'];
+                  if(char_role[0] == "Merlin" || char_role[0] == "Morgana")
+                    acc.push(key)
+                }
+                ws.send("As the Manager, you revealed " + acc.join(", ") + " to be the SysAdmin");
+                break;
+            }
+            // This case is ignored by our specials above, as their both always good
+            // so we can still use acc safely
+            if(role[1] != "Good" && role[0] != "Oberon")
+            {
+              for(var key in rooms[code]["users"]){
+                var char_role = rooms[code]['users'][key]['role'];
+                if(char_role[1] != 'Good' && char_role['0'] != "Oberon")
+                  acc.push(key)
+              }
+              ws.send("As a hacker, you know your fellow hackers are " + acc.join(', '))
+            }
+            else if(role[0] == "Member"){
+              ws.send("As a programmer, you have no one revealed! Pay close attention to the conversation to try and get info")
+            }
+            else if (role[0] == "Oberon")
+              ws.send("As the lone wolf, you don't know who the other hackers are! Pay close attention to the conversation to try and get info")
+            break;
+
+            case "GenerateQuest":
+              console.log("GENERATING A QUEST")
+              if(!rooms[code]['create_quest']){
+                rooms[code]['create_quest'] = true;
+                if(Object.keys(rooms[code]['available_quests']).length == 0){
+                  var quest = {"name": "", "required_players": 2, "flavor_text":"",
+                          "to_fail": 1, "on_success":"", "on_fail":"", "times_tried": 0,
+                          "players": [], "votes" : {"yesVotes": [], "noVotes": []}, "approval_count": 0,
+                          "disapproval_count": 0}
+                }
+                else{
+                  var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], room[code]['available_quests'])
+                }
+                rooms[code]['quest'] = quest
+
+                delete rooms[code]['available_quests'][quest['name']] // Prevent the same quest from being selected
+              }
+              ws.send("OK")
+            break;
+
+            case "RetrieveQuest":
+              var clientQuest = {"name": rooms[code]["quest"]["name"],
+                                 "required_players": rooms[code]["quest"]["required_players"],
+                                 "flavor_text":rooms[code]["quest"]["flavor_text"],
+                                 "votes": {"yesVotes":[], "noVotes": []},
+                                 "to_fail": rooms[code]["quest"]["to_fail"],
+                                 "times_tried": rooms[code]["quest"]["times_tried"],
+                                 "players": rooms[code]["quest"]["players"]
+                               }
+              ws.send(JSON.stringify(clientQuest))
+            break;
+
+            case "SetQuestMembers":
+              console.log("SETTING QUEST MEMBERS")
+              console.log("THIS IS THE ROOMS:")
+              console.log(rooms)
+              console.log(parsed)
+              if (parsed["user"])
+              {
+                ws.send("registered")
+              }
+              else{
+                rooms[code]['quest']['players'] = parsed['players'];
+                var clientQuest = {"name": rooms[code]["quest"]["name"],
+                                   "required_players": rooms[code]["quest"]["required_players"],
+                                   "flavor_text":rooms[code]["quest"]["flavor_text"],
+                                   "votes": {"yesVotes":[], "noVotes": []},
+                                   "to_fail": rooms[code]["quest"]["to_fail"],
+                                   "times_tried": rooms[code]["quest"]["times_tried"],
+                                   "players": rooms[code]["quest"]["players"]
+                                 }
+                for(var key in rooms[code]["users"]){
+                  if(rooms[code]["users"][key]["connection"].readyState == WebSocket.OPEN){
+                    rooms[code]["users"][key]["connection"].send(JSON.stringify(clientQuest));
+                  }
+                }
+              }
+            break;
+
+            case "ReceiveVotes":
+              try{
+                  rooms[code]['users'][parsed['user']]['connection'] = ws;
+                  // Make sure the user hasn't already voted
+                  if(rooms[code]['quest']['votes']['yesVotes'].indexOf(parsed['user']) < 0 &&
+                     rooms[code]['quest']['votes']['noVotes'].indexOf(parsed['user']) < 0){
+                    if (parsed['vote'] == 'Yes' || parsed['vote'] == 'No')
+                    {
+                      if (parsed['vote'] == 'Yes')
+                        rooms[code]['quest']['votes']['yesVotes'].push(parsed['user']);
+                      else
+                        rooms[code]['quest']['votes']['noVotes'].push(parsed['user']);
+                      if (rooms[code]['quest']['votes']['noVotes'].length + rooms[code]['quest']['votes']['yesVotes'].length == Object.keys(rooms[code]['users']).length)
+                      {
+                        if (rooms[code]['quest']['votes']['noVotes'].length >= rooms[code]['quest']['votes']['yesVotes'].length)
+                        {
+                            var clientQuest = {"name": rooms[code]["quest"]["name"],
+                                           "required_players": rooms[code]["quest"]["required_players"],
+                                           "flavor_text":rooms[code]["quest"]["flavor_text"],
+                                           "votes": rooms[code]['quest']['votes'],
+                                           "to_fail": rooms[code]["quest"]["to_fail"],
+                                           "times_tried": rooms[code]["quest"]["times_tried"]+1,
+                                           "players": []
+                                         };
+                        }
+                        else {
+                          var clientQuest = {"name": rooms[code]["quest"]["name"],
+                                         "required_players": rooms[code]["quest"]["required_players"],
+                                         "flavor_text":rooms[code]["quest"]["flavor_text"],
+                                         "votes": rooms[code]['quest']['votes'],
+                                         "to_fail": rooms[code]["quest"]["to_fail"],
+                                         "times_tried": rooms[code]["quest"]["times_tried"],
+                                         "players": rooms[code]["quest"]["players"]
+                                       };
+                        }
+
+                        for(var key in rooms[code]["users"]){
+                          if(rooms[code]["users"][key]["connection"].readyState === WebSocket.OPEN){
+                            rooms[code]["users"][key]["connection"].send(JSON.stringify(clientQuest));
+                          }
+                        }
+                        rooms[code]['create_quest'] = false
+                        if(rooms[code]['quest']['votes']['noVotes'].length >= rooms[code]['quest']['votes']['yesVotes'].length)
+                        {
+                            rooms[code]['quest']['times_tried'] += 1;
+                            rooms[code]['quest']['votes']['noVotes'] = []
+                            rooms[code]['quest']['votes']['yesVotes'] = []
+
+                        }
+                      }
+                      else {
+                        ws.send("Vote received");
+                      }
+                    }
+                    else{
+                      ws.send("An error occurred")
+                    }
+
+                }
+                else{
+                  ws.send("You've already voted")
+                }
+              }
+              catch (e){
+                  ws.send("An error occurred, please restart the game");
+                  console.log(e)
+              }
+            break;
+            case "TaskApproval":
+              try{
+                var parsed = JSON.parse(msg);
+                if(parsed['vote'])
+                {
+                  if(parsed['vote'] == 'Approve')
+                    rooms[code]['quest']['approval_count'] += 1;
+                  else if(parsed['vote'] == 'Disapprove')
+                    rooms[code]['quest']['disapproval_count'] += 1;
+                  console.log(rooms[code]['quest'])
+                  if(rooms[code]['quest']['disapproval_count'] + rooms[code]['quest']['approval_count'] == rooms[code]['quest']['required_players'])
+                  {
+                    var toReturn = {
+                                    "text":rooms[code]['quest']['on_success'],
+                                    "approves": rooms[code]['quest']['approval_count'],
+                                    "disapproves": rooms[code]['quest']['disapproval_count'],
+                                    "status": "success"
+                                   }
+                    if(rooms[code]['quest']['disapproval_count'] >= rooms[code]['quest']['to_fail'])
+                    {
+                      toReturn["text"] = rooms[code]['quest']['on_fail'];
+                      toReturn["status"] = "fail";
+                    }
+                    for(var key in rooms[code]["users"]){
+                      if(rooms[code]["users"][key]["connection"].readyState === WebSocket.OPEN){
+                        rooms[code]["users"][key]["connection"].send(JSON.stringify(toReturn));
+                      }
+                    }
+                  }
+                  else {
+                    ws.send("Action received");
+                  }
+                }
+                else {
+                  ws.send("Registered");
+                }
+              }
+              catch (e)
+              {
+                console.log(e)
+                ws.send("An error occurred, please restart the game");
+              }
+            break;
+        default:
+            if(findObject(ws, rooms[code]) < 0)
+            {
+              rooms[code]["users"][parsed["name"]] = {"connection": ws};
+            }
+            for(var key in rooms[code]["users"]){
+              if(rooms[code]["users"][key]["connection"].readyState === WebSocket.OPEN){
+                rooms[code]["users"][key]["connection"].send(parsed["name"] + ": " + parsed["msg"])
+              }
+            }
+            break;
+
         }
-        for(var key in rooms[code]["users"]){
-          if(rooms[code]["users"][key]["connections"]["chat"].readyState === WebSocket.OPEN){
-            rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
-          }
-        }
+
         setInterval(function timeout(){
             ws.ping();
         }, 500)
