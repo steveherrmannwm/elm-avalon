@@ -401,7 +401,7 @@ wss.on('connection', (ws) => {
                 }
                 else if (parsed['vote'] == 'No'){
                   rooms[parsed['room']]['quest']['votes']['noVotes'].push(parsed['user'])
-                  if (rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length == Object.keys(rooms[parsed['room']]['users']))
+                  if (rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length == Object.keys(rooms[parsed['room']]['users']).length)
                   {
                     if(rooms[parsed['room']]['quest']['votes']['noVotes'].length >= rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
                     {
