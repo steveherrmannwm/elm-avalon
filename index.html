@@ -10726,6 +10726,22 @@ var _steveherrmannwm$elm_avalon$Index$appendToComma = F3(
 			}
 		}
 	});
+var _steveherrmannwm$elm_avalon$Index$playersOption = function (playerName) {
+	return A2(
+		_elm_lang$html$Html$option,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$value(
+				_elm_lang$core$Basics$toString(playerName)),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(
+				_elm_lang$core$Basics$toString(playerName)),
+			_1: {ctor: '[]'}
+		});
+};
 var _steveherrmannwm$elm_avalon$Index$playerOption = function (maxPlayers) {
 	return A2(
 		_elm_lang$html$Html$option,
@@ -11716,7 +11732,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 									}
 								})))
 				};
-			default:
+			case 'ReceiveTask':
 				var _p14 = _p8._0;
 				return _elm_lang$core$Native_Utils.eq(_p14, 'Action received') ? {
 					ctor: '_Tuple2',
@@ -11768,6 +11784,8 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 									}
 								})))
 				};
+			default:
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
 var _steveherrmannwm$elm_avalon$Index$Home = {ctor: 'Home'};
@@ -11788,6 +11806,9 @@ var _steveherrmannwm$elm_avalon$Index$model = _steveherrmannwm$elm_avalon$Index$
 	{ctor: '[]'})(
 	A4(_steveherrmannwm$elm_avalon$Index$Task, '', 0, 0, ''))('')('');
 var _steveherrmannwm$elm_avalon$Index$init = {ctor: '_Tuple2', _0: _steveherrmannwm$elm_avalon$Index$model, _1: _elm_lang$core$Platform_Cmd$none};
+var _steveherrmannwm$elm_avalon$Index$SetAssassinateTarget = function (a) {
+	return {ctor: 'SetAssassinateTarget', _0: a};
+};
 var _steveherrmannwm$elm_avalon$Index$ReceiveTask = function (a) {
 	return {ctor: 'ReceiveTask', _0: a};
 };
@@ -12927,6 +12948,10 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 					}
 				});
 		case 'Final':
+			var selectEvent = A2(
+				_elm_lang$html$Html_Events$on,
+				'change',
+				A2(_elm_lang$core$Json_Decode$map, _steveherrmannwm$elm_avalon$Index$SetAssassinateTarget, _elm_lang$html$Html_Events$targetValue));
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -12967,7 +12992,18 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 									_elm_lang$core$List$map,
 									_steveherrmannwm$elm_avalon$Index$viewMessage,
 									_elm_lang$core$List$reverse(model.chatMessages))),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$select,
+									{
+										ctor: '::',
+										_0: selectEvent,
+										_1: {ctor: '[]'}
+									},
+									A2(_elm_lang$core$List$map, _steveherrmannwm$elm_avalon$Index$playersOption, model.currentPlayers)),
+								_1: {ctor: '[]'}
+							}
 						}
 					}
 				});

@@ -391,7 +391,9 @@ wss.on('connection', (ws) => {
                                "players": rooms[parsed['room']]["quest"]["players"]
                              }
             for(var key in rooms[parsed['room']]["users"]){
-              rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(JSON.stringify(clientQuest));
+              if(rooms[parsed['room']]["users"][key]["connections"]["quest_members"].readyState == WebSocket.OPEN){
+                rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(JSON.stringify(clientQuest));
+              }
             }
           }
         });
@@ -437,7 +439,9 @@ wss.on('connection', (ws) => {
                     }
 
                     for(var key in rooms[parsed['room']]["users"]){
-                      rooms[parsed['room']]["users"][key]["connections"]["voting"].send(JSON.stringify(clientQuest));
+                      if(rooms[parsed['room']]["users"][key]["connections"]["voting"].readyState === WebSocket.OPEN){
+                        rooms[parsed['room']]["users"][key]["connections"]["voting"].send(JSON.stringify(clientQuest));
+                      }
                     }
                     rooms[parsed['room']]['create_quest'] = false
                     if(rooms[parsed['room']]['quest']['votes']['noVotes'].length >= rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
@@ -493,7 +497,9 @@ wss.on('connection', (ws) => {
                   toReturn["status"] = "fail";
                 }
                 for(var key in rooms[parsed['room']]["users"]){
-                  rooms[parsed['room']]["users"][key]["connections"]["approval"].send(JSON.stringify(toReturn));
+                  if(rooms[parsed['room']]["users"][key]["connections"]["approval"].readyState === WebSocket.OPEN){
+                    rooms[parsed['room']]["users"][key]["connections"]["approval"].send(JSON.stringify(toReturn));
+                  }
                 }
               }
               else {
@@ -524,7 +530,9 @@ wss.on('connection', (ws) => {
           rooms[code]["users"][parsed["name"]] = {"connections": {"chat": ws}};
         }
         for(var key in rooms[code]["users"]){
-          rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
+          if(rooms[code]["users"][key]["connections"]["chat"].readyState === WebSocket.OPEN){
+            rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
+          }
         }
       })
   }

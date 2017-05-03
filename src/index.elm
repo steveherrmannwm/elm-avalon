@@ -170,6 +170,7 @@ type Msg
     | ApproveTask
     | SabotageTask
     | ReceiveTask String
+    | SetAssassinateTarget String
 
 
 questDecoder : Json.Decode.Decoder Quest
@@ -397,6 +398,9 @@ update msg model =
       else
         (updateModelOnTask {model | lastTaskResult = (checkTaskDecoder (Json.Decode.decodeString taskDecoder response)), state = TeamBuild, currentRound = model.currentRound + 1}, WebSocket.send generateQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
 
+    SetAssassinateTarget target ->
+      (model, Cmd.none)
+
 
 -- SUBSCRIPTIONS
 
@@ -422,6 +426,9 @@ subscriptions model =
 
 playerOption maxPlayers =
   option [ Html.Attributes.value (toString maxPlayers)] [ text (toString maxPlayers)]
+
+playersOption playerName =
+  option [ Html.Attributes.value (toString playerName)] [ text (toString playerName)]
 
 view : Model -> Html Msg
 view model =
@@ -504,7 +511,6 @@ view model =
     Decide ->
       let
         decisions = if List.member model.user.name model.quest.players then
-
           div [] [fieldset []
           (if model.user.alignment /= Good then
                 [button [type_ "button", onClick ApproveTask] [text "Approve Task"]
@@ -528,10 +534,18 @@ view model =
       , div [] [text (model.revealedInfo)]
       , div [] [text model.errors]
       ]
-    Final -> div []
+    Final ->
+      let
+        selectEvent =
+                on "change"
+                    (Json.Decode.map SetAssassinateTarget Html.Events.targetValue)
+      in
+      div []
       [ input [onInput Input, placeholder "Chat with others!"] []
       , button [onClick Send] [text "Send"]
-      , div [] (List.map viewMessage (List.reverse model.chatMessages))]
+      , div [] (List.map viewMessage (List.reverse model.chatMessages))
+      , Html.select [ selectEvent] (List.map playersOption model.currentPlayers)
+      ]
     Victory -> div [] [text (model.victory)]
 
 appendToComma : Maybe String -> List String -> String -> String
