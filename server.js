@@ -173,6 +173,8 @@ function generateQuest(roundNumber, maxPlayers, questTexts){
           "on_success": questTexts[key]["on_success"],
           "on_fail": questTexts[key]["on_fail"],
           "votes": {"yesVotes": [], "noVotes": []},
+          "approval_count": 0,
+          "disapproval_count": 0,
           "times_tried" : 0,
           "players": []
          }
@@ -206,12 +208,14 @@ wss.on('connection', (ws) => {
                      "create_quest": false,
                      "quest": {"name": "", "required_players": 2, "flavor_text":"",
                                "to_fail": 1, "on_success":"", "on_fail":"", "times_tried": 0,
-                               "players": [], "votes" : {"yesVotes": [], "noVotes": []}
+                               "players": [], "votes" : {"yesVotes": [], "noVotes": []}, "approval_count": 0,
+                               "disapproval_count": 0
                               }
                     }
       current_rooms.push("/"+code)
       });
       break;
+
     case "/join_room":
       ws.on('message', function(msg) {
         var parsed = JSON.parse(msg)
@@ -441,6 +445,47 @@ wss.on('connection', (ws) => {
               console.log(e)
           }
         });
+        break;
+      case "/task_approval":
+        ws.on("message", function(msg){
+          try{
+            var parsed = JSON.parse(msg);
+            rooms[parsed['room']]['users'][parsed['user']]['connections']['approval'] = ws
+            if(parsed['vote'])
+            {
+              if(parsed['vote'] == 'Approve')
+                rooms[parsed['room']]['quest']['approval_count'] += 1;
+              else if(parsed['vote'] == 'Disapprove')
+                rooms[parsed['room']]['quest']['disapproval_count'] += 1;
+
+              if(rooms[parsed['room']]['quest']['disapproval_count'] + rooms[parsed['room']]['quest']['approval_count'] == rooms[parsed['room']]['quest']['required_players'])
+              {
+                var toReturn = {
+                                "text":rooms[parsed['room']]['quest']['on_success'],
+                                "approves": rooms[parsed['room']]['quest']['approval_count'],
+                                "disapproves": rooms[parsed['room']]['quest']['disapproval_count'],
+                                "status": "success"
+                               }
+                if(rooms[parsed['room']]['quest']['disapproval_count'] >= rooms[parsed['room']]['quest']['to_fail'])
+                {
+                  toReturn["text"] = rooms[parsed['room']]['quest']['on_fail'];
+                  toReturn["status"] = "fail";
+                }
+              }
+              else {
+                ws.send("Action received");
+              }
+            }
+            else {
+              ws.send("Registered");
+            }
+
+          }
+          catch (e)
+          {
+            ws.send("An error occurred, please restart the game");
+          }
+        })
         break;
 
   }

@@ -54,6 +54,9 @@ receiveQuestTeam = wsServer++"retrieve_quest_members"
 
 sendVotes : String
 sendVotes = wsServer++"receive_votes"
+
+taskApproval : String
+taskApproval = wsServer++"task_approval"
 -- Type definitions
 
 -- Define possible roles for players
@@ -158,6 +161,9 @@ type Msg
     | CharInfo String
     | VoteForTeam String
     | ReceiveVotes String
+    | ApproveTask
+    | SabotageTask
+    | ReceiveTask String
 
 
 questDecoder : Json.Decode.Decoder Quest
@@ -336,9 +342,21 @@ update msg model =
 
     ReceiveVotes response ->
       if response == "Vote received" then
-        ({model | state = Wait}, Cmd.none)
+        ({model | state = Wait}, WebSocket.send taskApproval (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name)])))
       else
         (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | leaderPosition = (model.leaderPosition + 1) % (model.maxPlayers), previousGroup = model.quest.players})), Cmd.none)
+
+    ApproveTask ->
+      (model, WebSocket.send taskApproval
+      (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name), ("vote", string "Approve")])))
+
+    SabotageTask ->
+      (model, WebSocket.send taskApproval
+      (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name), ("vote", string "Disapprove")])))
+
+    ReceiveTask response ->
+      ({model | errors = response}, Cmd.none)
+
 
 -- SUBSCRIPTIONS
 
@@ -357,6 +375,7 @@ subscriptions model =
   , WebSocket.listen retrieveQuest RetrieveQuest
   , WebSocket.listen setQuestMembers ReceiveQuestTeam
   , WebSocket.listen sendVotes ReceiveVotes
+  , WebSocket.listen taskApproval ReceiveTask
   ]
   -- TODO: Add listeners for other
 
@@ -446,9 +465,17 @@ view model =
     Decide ->
       let
         decisions = if List.member model.user.name model.quest.players then
-          ("ITS DECISION TIME")
+
+          div [] [fieldset []
+          (if model.user.alignment /= Good then
+                [button [type_ "button", onClick ApproveTask] [text "Approve Task"]
+                ,button [type_ "button", onClick SabotageTask] [text "Sabotage Task"]]
+          else
+              [button [type_ "button", onClick ApproveTask] [text "Approve Task"]]
+          )
+          ]
         else
-          ("Please wait while the chosen players determine the outcome of the task.")
+          div [] [text ("Please wait while the chosen players determine the outcome of the task.")]
       in
       div []
       [ input [onInput Input, placeholder "Chat with others!"] []
@@ -458,7 +485,7 @@ view model =
       , div [] (List.map viewMessage (List.reverse model.chatMessages))
       , div [] [text ("You've tried to complete this quest " ++ (toString model.quest.timesTried) ++ " times. If you fail to assign a team " ++ (toString (5 - model.quest.timesTried)) ++ " more times then the hackers win.")]
       , div [] [text ("It takes " ++ (toString model.quest.toFail) ++ " failures to fail this task.")]
-      , div [] [text decisions]
+      , decisions
       , div [] [text (model.revealedInfo)]
       , div [] [text model.errors]
       ]
