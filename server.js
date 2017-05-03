@@ -390,10 +390,6 @@ wss.on('connection', (ws) => {
                     rooms[parsed['room']]['quest']['votes']['noVotes'].push(parsed['user']);
                   if (rooms[parsed['room']]['quest']['votes']['noVotes'].length + rooms[parsed['room']]['quest']['votes']['yesVotes'].length == Object.keys(rooms[parsed['room']]['users']).length)
                   {
-                    if(rooms[parsed['room']]['quest']['votes']['noVotes'].length >= rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
-                    {
-                        rooms[parsed['room']]['quest']['times_tried'] += 1;
-                    }
                     var clientQuest = {"name": rooms[parsed['room']]["quest"]["name"],
                                        "required_players": rooms[parsed['room']]["quest"]["required_players"],
                                        "flavor_text":rooms[parsed['room']]["quest"]["flavor_text"],
@@ -405,6 +401,13 @@ wss.on('connection', (ws) => {
 
                     for(var key in rooms[parsed['room']]["users"]){
                       rooms[parsed['room']]["users"][key]["connections"]["voting"].send(JSON.stringify(clientQuest));
+                    }
+                    if(rooms[parsed['room']]['quest']['votes']['noVotes'].length >= rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
+                    {
+                        rooms[parsed['room']]['quest']['times_tried'] += 1;
+                        rooms[parsed['room']]['quest']['votes']['noVotes'] = []
+                        rooms[parsed['room']]['quest']['votes']['yesVotes'] = []
+
                     }
                   }
                   else {
