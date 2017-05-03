@@ -486,6 +486,7 @@ wss.on('connection', (ws) => {
           }
           catch (e)
           {
+            console.log(e)
             ws.send("An error occurred, please restart the game");
           }
         })
