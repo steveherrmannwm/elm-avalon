@@ -192,7 +192,6 @@ function shuffle(a) {
 }
 
 wss.on('connection', (ws) => {
-  ws._socket.setKeepAlive(true);
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
 
