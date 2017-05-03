@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const WebSocket = require('ws');
 const SocketServer = require('ws').Server;
 const path = require('path');
 const url = require('url');
@@ -394,7 +395,7 @@ wss.on('connection', (ws) => {
                                "players": rooms[parsed['room']]["quest"]["players"]
                              }
             for(var key in rooms[parsed['room']]["users"]){
-              if(rooms[parsed['room']]["users"][key]["connections"]["quest_members"].readyState == SocketServer.OPEN){
+              if(rooms[parsed['room']]["users"][key]["connections"]["quest_members"].readyState == WebSocket.OPEN){
                 rooms[parsed['room']]["users"][key]["connections"]["quest_members"].send(JSON.stringify(clientQuest));
               }
             }
@@ -442,7 +443,7 @@ wss.on('connection', (ws) => {
                     }
 
                     for(var key in rooms[parsed['room']]["users"]){
-                      if(rooms[parsed['room']]["users"][key]["connections"]["voting"].readyState === SocketServer.OPEN){
+                      if(rooms[parsed['room']]["users"][key]["connections"]["voting"].readyState === WebSocket.OPEN){
                         rooms[parsed['room']]["users"][key]["connections"]["voting"].send(JSON.stringify(clientQuest));
                       }
                     }
@@ -500,7 +501,7 @@ wss.on('connection', (ws) => {
                   toReturn["status"] = "fail";
                 }
                 for(var key in rooms[parsed['room']]["users"]){
-                  if(rooms[parsed['room']]["users"][key]["connections"]["approval"].readyState === SocketServer.OPEN){
+                  if(rooms[parsed['room']]["users"][key]["connections"]["approval"].readyState === WebSocket.OPEN){
                     rooms[parsed['room']]["users"][key]["connections"]["approval"].send(JSON.stringify(toReturn));
                   }
                 }
@@ -537,8 +538,8 @@ wss.on('connection', (ws) => {
         for(var key in rooms[code]["users"]){
           console.log("READYSTATE")
           console.log(rooms[code]["users"][key]["connections"]["chat"].readyState)
-          console.log(SocketServer.OPEN)
-          if(rooms[code]["users"][key]["connections"]["chat"].readyState === SocketServer.OPEN){
+          console.log(WebSocket.OPEN)
+          if(rooms[code]["users"][key]["connections"]["chat"].readyState === WebSocket.OPEN){
             rooms[code]["users"][key]["connections"]["chat"].send(parsed["name"] + ": " + parsed["msg"])
           }
         }
