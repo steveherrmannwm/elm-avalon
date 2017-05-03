@@ -472,7 +472,7 @@ wss.on('connection', (ws) => {
                   toReturn["status"] = "fail";
                 }
                 for(var key in rooms[parsed['room']]["users"]){
-                  rooms[parsed['room']]["users"][key]["connections"]["approval"].send(JSON.stringify(clientQuest));
+                  rooms[parsed['room']]["users"][key]["connections"]["approval"].send(JSON.stringify(toReturn));
                 }
               }
               else {

@@ -355,7 +355,10 @@ update msg model =
       (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("user", string model.user.name), ("vote", string "Disapprove")])))
 
     ReceiveTask response ->
-      ({model | errors = response}, Cmd.none)
+      if response == "Action received" then
+        ({model | errors = response}, Cmd.none)
+      else
+        ({model | state = Wait}, Cmd.none)
 
 
 -- SUBSCRIPTIONS
