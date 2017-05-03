@@ -335,7 +335,7 @@ update msg model =
       if response == "Vote received" then
         ({model | state = Wait}, Cmd.none)
       else
-        (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | leaderPosition = model.leaderPosition + 1})))
+        (checkQuestVotes (checkQuestDecoder (Json.Decode.decodeString questDecoder response) ({model | leaderPosition = model.leaderPosition + 1})), Cmd.none)
 
 -- SUBSCRIPTIONS
 
