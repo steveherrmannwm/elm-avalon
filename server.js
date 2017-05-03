@@ -503,14 +503,16 @@ wss.on('connection', (ws) => {
                 ws.send("An error occurred, please restart the game");
               }
             break;
-        default:
+        case "":
             if(findObject(ws, rooms[code]) < 0)
             {
               rooms[code]["users"][parsed["name"]] = {"connection": ws};
             }
+            var message = parsed
+
             for(var key in rooms[code]["users"]){
               if(rooms[code]["users"][key]["connection"].readyState === WebSocket.OPEN){
-                rooms[code]["users"][key]["connection"].send(parsed["name"] + ": " + parsed["msg"])
+                rooms[code]["users"][key]["connection"].send(JSON.stringify(parsed))
               }
             }
             break;
