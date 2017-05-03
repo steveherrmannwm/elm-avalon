@@ -347,7 +347,7 @@ wss.on('connection', (ws) => {
         ws.on("message", function(msg){
           var parsed = JSON.parse(msg);
           console.log("SETTING QUEST MEMBERS")
-          console.log("THIS IS THE ROOMS:")"
+          console.log("THIS IS THE ROOMS:")
           console.log(rooms)
           console.log(parsed)
           if (parsed["user"])
