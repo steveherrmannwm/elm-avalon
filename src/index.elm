@@ -395,7 +395,7 @@ update msg model =
       if response == "Action received" then
         ({model | state = Wait}, Cmd.none)
       else
-        (updateModelOnTask {model | lastTaskResult = (checkTaskDecoder (Json.Decode.decodeString taskDecoder response))}, Cmd.none)
+        (updateModelOnTask {model | lastTaskResult = (checkTaskDecoder (Json.Decode.decodeString taskDecoder response)), state = TeamBuild, currentRound = model.currentRound + 1}, WebSocket.send generateQuest (Json.Encode.encode 0 (Json.Encode.object [("room", string model.room), ("roundNumber", Json.Encode.int model.currentRound), ("maxPlayers", Json.Encode.int model.maxPlayers)])))
 
 
 -- SUBSCRIPTIONS

@@ -323,7 +323,15 @@ wss.on('connection', (ws) => {
           console.log("GENERATING A QUEST")
           if(!rooms[parsed['room']]['create_quest']){
             rooms[parsed['room']]['create_quest'] = true;
-            var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
+            if(Object.keys(rooms[parsed['room']]['available_quests']).length == 0){
+              var quest = {"name": "", "required_players": 2, "flavor_text":"",
+                      "to_fail": 1, "on_success":"", "on_fail":"", "times_tried": 0,
+                      "players": [], "votes" : {"yesVotes": [], "noVotes": []}, "approval_count": 0,
+                      "disapproval_count": 0}
+            }
+            else{
+              var quest = generateQuest(parsed['roundNumber'], parsed['maxPlayers'], rooms[parsed['room']]['available_quests'])
+            }
             rooms[parsed['room']]['quest'] = quest
 
             delete rooms[parsed['room']]['available_quests'][quest['name']] // Prevent the same quest from being selected
@@ -419,6 +427,7 @@ wss.on('connection', (ws) => {
                     for(var key in rooms[parsed['room']]["users"]){
                       rooms[parsed['room']]["users"][key]["connections"]["voting"].send(JSON.stringify(clientQuest));
                     }
+                    rooms[parsed['room']]['create_quest'] = false
                     if(rooms[parsed['room']]['quest']['votes']['noVotes'].length >= rooms[parsed['room']]['quest']['votes']['yesVotes'].length)
                     {
                         rooms[parsed['room']]['quest']['times_tried'] += 1;

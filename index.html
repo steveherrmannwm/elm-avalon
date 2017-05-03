@@ -10781,6 +10781,7 @@ var _steveherrmannwm$elm_avalon$Index$generateQuest = A2(_elm_lang$core$Basics_o
 var _steveherrmannwm$elm_avalon$Index$retrieveQuest = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'retrieve_quest');
 var _steveherrmannwm$elm_avalon$Index$receiveQuestTeam = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'retrieve_quest_members');
 var _steveherrmannwm$elm_avalon$Index$sendVotes = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'receive_votes');
+var _steveherrmannwm$elm_avalon$Index$taskApproval = A2(_elm_lang$core$Basics_ops['++'], _steveherrmannwm$elm_avalon$Index$wsServer, 'task_approval');
 var _steveherrmannwm$elm_avalon$Index$Player = F3(
 	function (a, b, c) {
 		return {name: a, role: b, alignment: c};
@@ -10870,6 +10871,53 @@ var _steveherrmannwm$elm_avalon$Index$questDecoder = A9(
 			_1: {ctor: '[]'}
 		},
 		_elm_lang$core$Json_Decode$int));
+var _steveherrmannwm$elm_avalon$Index$Task = F4(
+	function (a, b, c, d) {
+		return {text: a, approveVotes: b, disapproveVotes: c, status: d};
+	});
+var _steveherrmannwm$elm_avalon$Index$taskDecoder = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_steveherrmannwm$elm_avalon$Index$Task,
+	A2(
+		_elm_lang$core$Json_Decode$at,
+		{
+			ctor: '::',
+			_0: 'text',
+			_1: {ctor: '[]'}
+		},
+		_elm_lang$core$Json_Decode$string),
+	A2(
+		_elm_lang$core$Json_Decode$at,
+		{
+			ctor: '::',
+			_0: 'approves',
+			_1: {ctor: '[]'}
+		},
+		_elm_lang$core$Json_Decode$int),
+	A2(
+		_elm_lang$core$Json_Decode$at,
+		{
+			ctor: '::',
+			_0: 'disapproves',
+			_1: {ctor: '[]'}
+		},
+		_elm_lang$core$Json_Decode$int),
+	A2(
+		_elm_lang$core$Json_Decode$at,
+		{
+			ctor: '::',
+			_0: 'status',
+			_1: {ctor: '[]'}
+		},
+		_elm_lang$core$Json_Decode$string));
+var _steveherrmannwm$elm_avalon$Index$checkTaskDecoder = function (decoded) {
+	var _p3 = decoded;
+	if (_p3.ctor === 'Ok') {
+		return _p3._0;
+	} else {
+		return A4(_steveherrmannwm$elm_avalon$Index$Task, '', 0, 0, '');
+	}
+};
 var _steveherrmannwm$elm_avalon$Index$Model = function (a) {
 	return function (b) {
 		return function (c) {
@@ -10884,7 +10932,11 @@ var _steveherrmannwm$elm_avalon$Index$Model = function (a) {
 											return function (l) {
 												return function (m) {
 													return function (n) {
-														return {user: a, room: b, maxPlayers: c, currentPlayers: d, chatBox: e, chatMessages: f, state: g, leaderPosition: h, currentRound: i, evilVictories: j, revealedInfo: k, quest: l, previousGroup: m, errors: n};
+														return function (o) {
+															return function (p) {
+																return {user: a, room: b, maxPlayers: c, currentPlayers: d, chatBox: e, chatMessages: f, state: g, leaderPosition: h, currentRound: i, evilVictories: j, revealedInfo: k, quest: l, previousGroup: m, lastTaskResult: n, errors: o, victory: p};
+															};
+														};
 													};
 												};
 											};
@@ -10908,8 +10960,8 @@ var _steveherrmannwm$elm_avalon$Index$Minion = {ctor: 'Minion'};
 var _steveherrmannwm$elm_avalon$Index$Member = {ctor: 'Member'};
 var _steveherrmannwm$elm_avalon$Index$Merlin = {ctor: 'Merlin'};
 var _steveherrmannwm$elm_avalon$Index$readRole = function (str) {
-	var _p3 = str;
-	switch (_p3) {
+	var _p4 = str;
+	switch (_p4) {
 		case 'Merlin':
 			return _steveherrmannwm$elm_avalon$Index$Merlin;
 		case 'Member':
@@ -10929,9 +10981,9 @@ var _steveherrmannwm$elm_avalon$Index$readRole = function (str) {
 	}
 };
 var _steveherrmannwm$elm_avalon$Index$parseRole = function (str) {
-	var _p4 = str;
-	if (_p4.ctor === 'Just') {
-		return _steveherrmannwm$elm_avalon$Index$readRole(_p4._0);
+	var _p5 = str;
+	if (_p5.ctor === 'Just') {
+		return _steveherrmannwm$elm_avalon$Index$readRole(_p5._0);
 	} else {
 		return _steveherrmannwm$elm_avalon$Index$Unassigned;
 	}
@@ -10941,8 +10993,8 @@ var _steveherrmannwm$elm_avalon$Index$Assassin = {ctor: 'Assassin'};
 var _steveherrmannwm$elm_avalon$Index$Evil = {ctor: 'Evil'};
 var _steveherrmannwm$elm_avalon$Index$Good = {ctor: 'Good'};
 var _steveherrmannwm$elm_avalon$Index$readAlign = function (str) {
-	var _p5 = str;
-	switch (_p5) {
+	var _p6 = str;
+	switch (_p6) {
 		case 'Good':
 			return _steveherrmannwm$elm_avalon$Index$Good;
 		case 'Evil':
@@ -10954,9 +11006,9 @@ var _steveherrmannwm$elm_avalon$Index$readAlign = function (str) {
 	}
 };
 var _steveherrmannwm$elm_avalon$Index$parseAlignment = function (str) {
-	var _p6 = str;
-	if (_p6.ctor === 'Just') {
-		return _steveherrmannwm$elm_avalon$Index$readAlign(_p6._0);
+	var _p7 = str;
+	if (_p7.ctor === 'Just') {
+		return _steveherrmannwm$elm_avalon$Index$readAlign(_p7._0);
 	} else {
 		return _steveherrmannwm$elm_avalon$Index$Unaligned;
 	}
@@ -10979,6 +11031,20 @@ var _steveherrmannwm$elm_avalon$Index$parseRoleResponse = F2(
 			A2(_elm_lang$core$String$split, ',', str),
 			player);
 	});
+var _steveherrmannwm$elm_avalon$Index$Victory = {ctor: 'Victory'};
+var _steveherrmannwm$elm_avalon$Index$checkVictoryConditions = function (model) {
+	return (_elm_lang$core$Native_Utils.cmp(model.evilVictories, 3) > -1) ? _elm_lang$core$Native_Utils.update(
+		model,
+		{state: _steveherrmannwm$elm_avalon$Index$Victory, victory: 'The hackers have managed destroy the project. Hackers victory'}) : ((_elm_lang$core$Native_Utils.cmp(model.quest.timesTried, 5) > -1) ? _elm_lang$core$Native_Utils.update(
+		model,
+		{state: _steveherrmannwm$elm_avalon$Index$Victory, victory: 'The hackers have sufficently delayed the project. Hackers Win.'}) : model);
+};
+var _steveherrmannwm$elm_avalon$Index$updateModelOnTask = function (model) {
+	return _elm_lang$core$Native_Utils.eq(model.lastTaskResult.status, 'fail') ? _steveherrmannwm$elm_avalon$Index$checkVictoryConditions(
+		_elm_lang$core$Native_Utils.update(
+			model,
+			{evilVictories: model.evilVictories + 1})) : _steveherrmannwm$elm_avalon$Index$checkVictoryConditions(model);
+};
 var _steveherrmannwm$elm_avalon$Index$Final = {ctor: 'Final'};
 var _steveherrmannwm$elm_avalon$Index$Decide = {ctor: 'Decide'};
 var _steveherrmannwm$elm_avalon$Index$Wait = {ctor: 'Wait'};
@@ -10987,24 +11053,26 @@ var _steveherrmannwm$elm_avalon$Index$TeamBuild = {ctor: 'TeamBuild'};
 var _steveherrmannwm$elm_avalon$Index$checkQuestVotes = function (model) {
 	return (_elm_lang$core$Native_Utils.cmp(
 		_elm_lang$core$List$length(model.quest.noVotes),
-		_elm_lang$core$List$length(model.quest.yesVotes)) > -1) ? _elm_lang$core$Native_Utils.update(
-		model,
-		{state: _steveherrmannwm$elm_avalon$Index$TeamBuild}) : _elm_lang$core$Native_Utils.update(
-		model,
-		{state: _steveherrmannwm$elm_avalon$Index$Decide});
+		_elm_lang$core$List$length(model.quest.yesVotes)) > -1) ? _steveherrmannwm$elm_avalon$Index$checkVictoryConditions(
+		_elm_lang$core$Native_Utils.update(
+			model,
+			{state: _steveherrmannwm$elm_avalon$Index$TeamBuild})) : _steveherrmannwm$elm_avalon$Index$checkVictoryConditions(
+		_elm_lang$core$Native_Utils.update(
+			model,
+			{state: _steveherrmannwm$elm_avalon$Index$Decide}));
 };
 var _steveherrmannwm$elm_avalon$Index$Setup = {ctor: 'Setup'};
 var _steveherrmannwm$elm_avalon$Index$update = F2(
 	function (msg, model) {
-		var _p7 = msg;
-		switch (_p7.ctor) {
+		var _p8 = msg;
+		switch (_p8.ctor) {
 			case 'Name':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							user: A3(_steveherrmannwm$elm_avalon$Index$Player, _p7._0, _steveherrmannwm$elm_avalon$Index$Unassigned, _steveherrmannwm$elm_avalon$Index$Unaligned)
+							user: A3(_steveherrmannwm$elm_avalon$Index$Player, _p8._0, _steveherrmannwm$elm_avalon$Index$Unassigned, _steveherrmannwm$elm_avalon$Index$Unaligned)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -11013,12 +11081,12 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{room: _p7._0}),
+						{room: _p8._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'JoinRoom':
-				var _p8 = _p7._0;
-				return _elm_lang$core$Native_Utils.eq(_p8, 'OK') ? {
+				var _p9 = _p8._0;
+				return _elm_lang$core$Native_Utils.eq(_p9, 'OK') ? {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
@@ -11051,7 +11119,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{errors: _p8}),
+						{errors: _p9}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'SetRoom':
@@ -11088,13 +11156,13 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 								})))
 				};
 			case 'GenRoom':
-				var _p9 = _p7._0;
+				var _p10 = _p8._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							room: _p9,
+							room: _p10,
 							user: A3(_steveherrmannwm$elm_avalon$Index$Player, model.user.name, _steveherrmannwm$elm_avalon$Index$Unassigned, _steveherrmannwm$elm_avalon$Index$Unaligned)
 						}),
 					_1: A2(
@@ -11116,7 +11184,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 										_0: {
 											ctor: '_Tuple2',
 											_0: 'room',
-											_1: _elm_lang$core$Json_Encode$string(_p9)
+											_1: _elm_lang$core$Json_Encode$string(_p10)
 										},
 										_1: {ctor: '[]'}
 									}
@@ -11134,7 +11202,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							currentPlayers: A2(_elm_lang$core$String$split, ',', _p7._0)
+							currentPlayers: A2(_elm_lang$core$String$split, ',', _p8._0)
 						}),
 					_1: A2(
 						_elm_lang$websocket$WebSocket$send,
@@ -11162,7 +11230,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 								})))
 				};
 			case 'CreateRoles':
-				return (!_elm_lang$core$Native_Utils.eq(_p7._0, 'NEP')) ? {
+				return (!_elm_lang$core$Native_Utils.eq(_p8._0, 'NEP')) ? {
 					ctor: '_Tuple2',
 					_0: model,
 					_1: A2(
@@ -11195,7 +11263,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					ctor: '_Tuple2',
 					_0: A2(
 						_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
-						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p7._0),
+						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p8._0),
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{state: _steveherrmannwm$elm_avalon$Index$TeamBuild})),
@@ -11250,14 +11318,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{
-							revealedInfo: _p7._0,
-							errors: '',
-							leaderPosition: A2(
-								_elm_lang$core$Basics_ops['%'],
-								model.leaderPosition + 1,
-								_elm_lang$core$List$length(model.currentPlayers))
-						}),
+						{revealedInfo: _p8._0, errors: ''}),
 					_1: A2(
 						_elm_lang$websocket$WebSocket$send,
 						_steveherrmannwm$elm_avalon$Index$generateQuest,
@@ -11297,7 +11358,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							user: A2(_steveherrmannwm$elm_avalon$Index$parseRoleResponse, _p7._0, model.user)
+							user: A2(_steveherrmannwm$elm_avalon$Index$parseRoleResponse, _p8._0, model.user)
 						}),
 					_1: A2(
 						_elm_lang$websocket$WebSocket$send,
@@ -11329,7 +11390,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{maxPlayers: _p7._0}),
+						{maxPlayers: _p8._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Input':
@@ -11337,12 +11398,12 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{chatBox: _p7._0}),
+						{chatBox: _p8._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateQuestTeam':
-				var _p10 = _p7._0;
-				return A2(_elm_lang$core$List$member, _p10, model.quest.players) ? {
+				var _p11 = _p8._0;
+				return A2(_elm_lang$core$List$member, _p11, model.quest.players) ? {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
@@ -11351,7 +11412,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 								_steveherrmannwm$elm_avalon$Index$Quest,
 								model.quest.name,
 								model.quest.playersRequired,
-								A2(_elm_community$list_extra$List_Extra$remove, _p10, model.quest.players),
+								A2(_elm_community$list_extra$List_Extra$remove, _p11, model.quest.players),
 								model.quest.yesVotes,
 								model.quest.noVotes,
 								model.quest.flavorText,
@@ -11368,7 +11429,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 								_steveherrmannwm$elm_avalon$Index$Quest,
 								model.quest.name,
 								model.quest.playersRequired,
-								{ctor: '::', _0: _p10, _1: model.quest.players},
+								{ctor: '::', _0: _p11, _1: model.quest.players},
 								model.quest.yesVotes,
 								model.quest.noVotes,
 								model.quest.flavorText,
@@ -11412,7 +11473,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							chatMessages: {ctor: '::', _0: _p7._0, _1: model.chatMessages}
+							chatMessages: {ctor: '::', _0: _p8._0, _1: model.chatMessages}
 						}),
 					_1: A2(
 						_elm_lang$websocket$WebSocket$send,
@@ -11488,12 +11549,12 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				});
 			case 'ReceiveQuestTeam':
-				var _p11 = _p7._0;
-				return (!_elm_lang$core$Native_Utils.eq(_p11, 'registered')) ? {
+				var _p12 = _p8._0;
+				return (!_elm_lang$core$Native_Utils.eq(_p12, 'registered')) ? {
 					ctor: '_Tuple2',
 					_0: A2(
 						_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
-						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p11),
+						A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p12),
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{state: _steveherrmannwm$elm_avalon$Index$Vote})),
@@ -11522,7 +11583,7 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 										_0: {
 											ctor: '_Tuple2',
 											_0: 'vote',
-											_1: _elm_lang$core$Json_Encode$string(_p7._0)
+											_1: _elm_lang$core$Json_Encode$string(_p8._0)
 										},
 										_1: {
 											ctor: '::',
@@ -11536,9 +11597,128 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 									}
 								})))
 				};
+			case 'ReceiveVotes':
+				var _p13 = _p8._0;
+				return _elm_lang$core$Native_Utils.eq(_p13, 'Vote received') ? {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: _steveherrmannwm$elm_avalon$Index$Wait}),
+					_1: A2(
+						_elm_lang$websocket$WebSocket$send,
+						_steveherrmannwm$elm_avalon$Index$taskApproval,
+						A2(
+							_elm_lang$core$Json_Encode$encode,
+							0,
+							_elm_lang$core$Json_Encode$object(
+								{
+									ctor: '::',
+									_0: {
+										ctor: '_Tuple2',
+										_0: 'room',
+										_1: _elm_lang$core$Json_Encode$string(model.room)
+									},
+									_1: {
+										ctor: '::',
+										_0: {
+											ctor: '_Tuple2',
+											_0: 'user',
+											_1: _elm_lang$core$Json_Encode$string(model.user.name)
+										},
+										_1: {ctor: '[]'}
+									}
+								})))
+				} : {
+					ctor: '_Tuple2',
+					_0: _steveherrmannwm$elm_avalon$Index$checkQuestVotes(
+						A2(
+							_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
+							A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p13),
+							_elm_lang$core$Native_Utils.update(
+								model,
+								{
+									leaderPosition: A2(_elm_lang$core$Basics_ops['%'], model.leaderPosition + 1, model.maxPlayers),
+									previousGroup: model.quest.players
+								}))),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'ApproveTask':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(
+						_elm_lang$websocket$WebSocket$send,
+						_steveherrmannwm$elm_avalon$Index$taskApproval,
+						A2(
+							_elm_lang$core$Json_Encode$encode,
+							0,
+							_elm_lang$core$Json_Encode$object(
+								{
+									ctor: '::',
+									_0: {
+										ctor: '_Tuple2',
+										_0: 'room',
+										_1: _elm_lang$core$Json_Encode$string(model.room)
+									},
+									_1: {
+										ctor: '::',
+										_0: {
+											ctor: '_Tuple2',
+											_0: 'user',
+											_1: _elm_lang$core$Json_Encode$string(model.user.name)
+										},
+										_1: {
+											ctor: '::',
+											_0: {
+												ctor: '_Tuple2',
+												_0: 'vote',
+												_1: _elm_lang$core$Json_Encode$string('Approve')
+											},
+											_1: {ctor: '[]'}
+										}
+									}
+								})))
+				};
+			case 'SabotageTask':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(
+						_elm_lang$websocket$WebSocket$send,
+						_steveherrmannwm$elm_avalon$Index$taskApproval,
+						A2(
+							_elm_lang$core$Json_Encode$encode,
+							0,
+							_elm_lang$core$Json_Encode$object(
+								{
+									ctor: '::',
+									_0: {
+										ctor: '_Tuple2',
+										_0: 'room',
+										_1: _elm_lang$core$Json_Encode$string(model.room)
+									},
+									_1: {
+										ctor: '::',
+										_0: {
+											ctor: '_Tuple2',
+											_0: 'user',
+											_1: _elm_lang$core$Json_Encode$string(model.user.name)
+										},
+										_1: {
+											ctor: '::',
+											_0: {
+												ctor: '_Tuple2',
+												_0: 'vote',
+												_1: _elm_lang$core$Json_Encode$string('Disapprove')
+											},
+											_1: {ctor: '[]'}
+										}
+									}
+								})))
+				};
 			default:
-				var _p12 = _p7._0;
-				return _elm_lang$core$Native_Utils.eq(_p12, 'Vote received') ? {
+				var _p14 = _p8._0;
+				return _elm_lang$core$Native_Utils.eq(_p14, 'Action received') ? {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
@@ -11546,14 +11726,47 @@ var _steveherrmannwm$elm_avalon$Index$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				} : {
 					ctor: '_Tuple2',
-					_0: _steveherrmannwm$elm_avalon$Index$checkQuestVotes(
+					_0: _steveherrmannwm$elm_avalon$Index$updateModelOnTask(
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								lastTaskResult: _steveherrmannwm$elm_avalon$Index$checkTaskDecoder(
+									A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$taskDecoder, _p14)),
+								state: _steveherrmannwm$elm_avalon$Index$TeamBuild,
+								currentRound: model.currentRound + 1
+							})),
+					_1: A2(
+						_elm_lang$websocket$WebSocket$send,
+						_steveherrmannwm$elm_avalon$Index$generateQuest,
 						A2(
-							_steveherrmannwm$elm_avalon$Index$checkQuestDecoder,
-							A2(_elm_lang$core$Json_Decode$decodeString, _steveherrmannwm$elm_avalon$Index$questDecoder, _p12),
-							_elm_lang$core$Native_Utils.update(
-								model,
-								{leaderPosition: model.leaderPosition + 1, previousGroup: model.quest.players}))),
-					_1: _elm_lang$core$Platform_Cmd$none
+							_elm_lang$core$Json_Encode$encode,
+							0,
+							_elm_lang$core$Json_Encode$object(
+								{
+									ctor: '::',
+									_0: {
+										ctor: '_Tuple2',
+										_0: 'room',
+										_1: _elm_lang$core$Json_Encode$string(model.room)
+									},
+									_1: {
+										ctor: '::',
+										_0: {
+											ctor: '_Tuple2',
+											_0: 'roundNumber',
+											_1: _elm_lang$core$Json_Encode$int(model.currentRound)
+										},
+										_1: {
+											ctor: '::',
+											_0: {
+												ctor: '_Tuple2',
+												_0: 'maxPlayers',
+												_1: _elm_lang$core$Json_Encode$int(model.maxPlayers)
+											},
+											_1: {ctor: '[]'}
+										}
+									}
+								})))
 				};
 		}
 	});
@@ -11561,7 +11774,7 @@ var _steveherrmannwm$elm_avalon$Index$Home = {ctor: 'Home'};
 var _steveherrmannwm$elm_avalon$Index$model = _steveherrmannwm$elm_avalon$Index$Model(
 	A3(_steveherrmannwm$elm_avalon$Index$Player, '', _steveherrmannwm$elm_avalon$Index$Unassigned, _steveherrmannwm$elm_avalon$Index$Unaligned))('')(5)(
 	{ctor: '[]'})('')(
-	{ctor: '[]'})(_steveherrmannwm$elm_avalon$Index$Home)(-1)(0)(0)('')(
+	{ctor: '[]'})(_steveherrmannwm$elm_avalon$Index$Home)(0)(0)(0)('')(
 	A8(
 		_steveherrmannwm$elm_avalon$Index$Quest,
 		'',
@@ -11572,8 +11785,14 @@ var _steveherrmannwm$elm_avalon$Index$model = _steveherrmannwm$elm_avalon$Index$
 		'',
 		0,
 		2))(
-	{ctor: '[]'})('');
+	{ctor: '[]'})(
+	A4(_steveherrmannwm$elm_avalon$Index$Task, '', 0, 0, ''))('')('');
 var _steveherrmannwm$elm_avalon$Index$init = {ctor: '_Tuple2', _0: _steveherrmannwm$elm_avalon$Index$model, _1: _elm_lang$core$Platform_Cmd$none};
+var _steveherrmannwm$elm_avalon$Index$ReceiveTask = function (a) {
+	return {ctor: 'ReceiveTask', _0: a};
+};
+var _steveherrmannwm$elm_avalon$Index$SabotageTask = {ctor: 'SabotageTask'};
+var _steveherrmannwm$elm_avalon$Index$ApproveTask = {ctor: 'ApproveTask'};
 var _steveherrmannwm$elm_avalon$Index$ReceiveVotes = function (a) {
 	return {ctor: 'ReceiveVotes', _0: a};
 };
@@ -11687,7 +11906,11 @@ var _steveherrmannwm$elm_avalon$Index$subscriptions = function (model) {
 												_1: {
 													ctor: '::',
 													_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$sendVotes, _steveherrmannwm$elm_avalon$Index$ReceiveVotes),
-													_1: {ctor: '[]'}
+													_1: {
+														ctor: '::',
+														_0: A2(_elm_lang$websocket$WebSocket$listen, _steveherrmannwm$elm_avalon$Index$taskApproval, _steveherrmannwm$elm_avalon$Index$ReceiveTask),
+														_1: {ctor: '[]'}
+													}
 												}
 											}
 										}
@@ -11707,8 +11930,8 @@ var _steveherrmannwm$elm_avalon$Index$Name = function (a) {
 	return {ctor: 'Name', _0: a};
 };
 var _steveherrmannwm$elm_avalon$Index$view = function (model) {
-	var _p13 = model.state;
-	switch (_p13.ctor) {
+	var _p15 = model.state;
+	switch (_p15.ctor) {
 		case 'Home':
 			var selectEvent = A2(
 				_elm_lang$html$Html_Events$on,
@@ -12494,6 +12717,81 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 					}
 				});
 		case 'Decide':
+			var decisions = A2(_elm_lang$core$List$member, model.user.name, model.quest.players) ? A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$fieldset,
+						{ctor: '[]'},
+						(!_elm_lang$core$Native_Utils.eq(model.user.alignment, _steveherrmannwm$elm_avalon$Index$Good)) ? {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$button,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$type_('button'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(_steveherrmannwm$elm_avalon$Index$ApproveTask),
+										_1: {ctor: '[]'}
+									}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Approve Task'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$button,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$type_('button'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onClick(_steveherrmannwm$elm_avalon$Index$SabotageTask),
+											_1: {ctor: '[]'}
+										}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Sabotage Task'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						} : {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$button,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$type_('button'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(_steveherrmannwm$elm_avalon$Index$ApproveTask),
+										_1: {ctor: '[]'}
+									}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Approve Task'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}) : A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Please wait while the chosen players determine the outcome of the task.'),
+					_1: {ctor: '[]'}
+				});
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -12596,14 +12894,7 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 												}),
 											_1: {
 												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$div,
-													{ctor: '[]'},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text(model.revealedInfo),
-														_1: {ctor: '[]'}
-													}),
+												_0: decisions,
 												_1: {
 													ctor: '::',
 													_0: A2(
@@ -12611,10 +12902,21 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 														{ctor: '[]'},
 														{
 															ctor: '::',
-															_0: _elm_lang$html$Html$text(model.errors),
+															_0: _elm_lang$html$Html$text(model.revealedInfo),
 															_1: {ctor: '[]'}
 														}),
-													_1: {ctor: '[]'}
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$div,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text(model.errors),
+																_1: {ctor: '[]'}
+															}),
+														_1: {ctor: '[]'}
+													}
 												}
 											}
 										}
@@ -12624,7 +12926,7 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 						}
 					}
 				});
-		default:
+		case 'Final':
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -12668,6 +12970,15 @@ var _steveherrmannwm$elm_avalon$Index$view = function (model) {
 							_1: {ctor: '[]'}
 						}
 					}
+				});
+		default:
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(model.victory),
+					_1: {ctor: '[]'}
 				});
 	}
 };
