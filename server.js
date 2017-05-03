@@ -192,7 +192,7 @@ function shuffle(a) {
 }
 
 wss.on('connection', (ws) => {
-  ws.setTimeout(60 * 1000 * 20);
+  ws.setKeepAlive(true);
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
   switch (path){
