@@ -449,6 +449,7 @@ wss.on('connection', (ws) => {
       for(var key in rooms[code]["users"]){
         if(rooms[code]["users"][key]["connections"]["chat"] === ws)
         {
+          console.log("Deleting " + key)
           delete rooms[code]["users"][key];
           dc = [key, code];
         }
