@@ -196,10 +196,6 @@ wss.on('connection', (ws) => {
   var location = url.parse(ws.upgradeReq.url, true)
   var path = location.pathname
 
-  setTimeout(function timeout() {
-    ws.send();
-  }, 500);
-
   switch (path){
     case "/gen_room":
     ws.on('message', function(msg) {
