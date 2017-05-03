@@ -253,7 +253,10 @@ wss.on('connection', (ws) => {
     case "/player_list":
       ws.on("message", function(msg){
         var parsed = JSON.parse(msg)
-        ws.send(Object.keys(rooms[parsed["room"]]["users"]).join(","))
+          ws.send(Object.keys(rooms[parsed["room"]]["users"]).join(","))
+          setInterval(function timeout (){
+            ws.ping();
+          }, 500)
       });
       break;
 
@@ -277,6 +280,7 @@ wss.on('connection', (ws) => {
         else {
           ws.send("NEP")
         }
+        
       });
       break;
     case "/retrieve_role":
