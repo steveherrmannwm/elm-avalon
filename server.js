@@ -247,6 +247,7 @@ wss.on('connection', (ws) => {
         }
       });
       break;
+
     case "/player_list":
       ws.on("message", function(msg){
         var parsed = JSON.parse(msg)
@@ -523,9 +524,9 @@ wss.on('connection', (ws) => {
   }
 
   if(current_rooms.indexOf(path) >= 0){
+    console.log(path +" FOUND")
     var code = path.split("/")[1] // Retrieve the room code
     ws.on('message', function(msg){
-      ws.set
         var parsed = JSON.parse(msg)
         if(findObject(ws, rooms[code]) < 0)
         {
